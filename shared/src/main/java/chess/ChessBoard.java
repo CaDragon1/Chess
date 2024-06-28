@@ -11,10 +11,11 @@ import java.util.Objects;
  */
 public class ChessBoard {
 
-    ChessPiece[][] board;
+    private ChessPiece[][] board;
 
     public ChessBoard() {
         board = new ChessPiece[8][8];
+        resetBoard();
     }
 
     /**
@@ -127,7 +128,7 @@ public class ChessBoard {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessBoard that = (ChessBoard) o;
-        System.out.println("Burgers");
+        System.out.println(Arrays.deepToString(board) + "\n^^ This board == Test Board vv\n" + Arrays.deepToString(that.board));
         return Arrays.deepEquals(board, that.board);
     }
 
