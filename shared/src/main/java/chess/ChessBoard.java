@@ -49,11 +49,13 @@ public class ChessBoard {
      */
     public void resetBoard() {
         clearBoard();
+        System.out.println("Board cleared. Current state:");
+        printBoard();
         setBackRow(ChessGame.TeamColor.BLACK, 0);
         setPawns(ChessGame.TeamColor.BLACK, 1);
         setPawns(ChessGame.TeamColor.WHITE, 6);
         setBackRow(ChessGame.TeamColor.WHITE, 7);
-        System.out.println();
+        System.out.println("Board reset. Current state:");
         printBoard();
     }
 
@@ -64,37 +66,40 @@ public class ChessBoard {
                 board[row][column] = null;
             }
         }
-        System.out.println();
-        printBoard();
     }
 
     // This function sets a row of pawns of a given color to a given row index.
-    private void setPawns(ChessGame.TeamColor teamColor, int row){
-        for (int column = 0; column < 8; column++) {
-            board[row][column] = new ChessPiece(teamColor, ChessPiece.PieceType.PAWN);
+    private void setPawns(ChessGame.TeamColor teamColor, int row) {
+        if (row == 1 || row == 6) {
+            for (int column = 0; column < 8; column++) {
+                board[row][column] = new ChessPiece(teamColor, ChessPiece.PieceType.PAWN);
+            }
         }
     }
 
     // This function sets up the back starting row of a normal chess game at a given row index.
     private void setBackRow(ChessGame.TeamColor teamColor, int row) {
-        for (int column = 0; column < 8; column++) {
+        if(row == 0 || row == 7) {
+            for (int column = 0; column < 8; column++) {
 
-            if (column == 0 || column == 7) {
-                board[row][column] = new ChessPiece(teamColor, ChessPiece.PieceType.ROOK);
-            } else if (column == 1 || column == 6) {
-                board[row][column] = new ChessPiece(teamColor, ChessPiece.PieceType.KNIGHT);
-            } else if (column == 2 || column == 5) {
-                board[row][column] = new ChessPiece(teamColor, ChessPiece.PieceType.BISHOP);
-            } else if (column == 3) {
-                board[row][column] = new ChessPiece(teamColor, ChessPiece.PieceType.QUEEN);
-            } else {
-                board[row][column] = new ChessPiece(teamColor, ChessPiece.PieceType.KING);
+                if (column == 0 || column == 7) {
+                    board[row][column] = new ChessPiece(teamColor, ChessPiece.PieceType.ROOK);
+                } else if (column == 1 || column == 6) {
+                    board[row][column] = new ChessPiece(teamColor, ChessPiece.PieceType.KNIGHT);
+                } else if (column == 2 || column == 5) {
+                    board[row][column] = new ChessPiece(teamColor, ChessPiece.PieceType.BISHOP);
+                } else if (column == 3) {
+                    board[row][column] = new ChessPiece(teamColor, ChessPiece.PieceType.QUEEN);
+                } else {
+                    board[row][column] = new ChessPiece(teamColor, ChessPiece.PieceType.KING);
+                }
             }
         }
     }
 
     // Additional function to print the board state for testing purposes.
-    private void printBoard () {
+    public void printBoard () {
+        System.out.println("Printing board:\n________________");
         for (int row = 0; row < 8; row++) {
             for (int column = 0; column < 8; column++) {
                 /*if (board[row][column] != null) {
@@ -113,13 +118,14 @@ public class ChessBoard {
                     }*/
 
                 if (board[row][column] != null) {
-                    System.out.println(board[row][column]);
+                    System.out.print(board[row][column].color + " " + board[row][column].piece + " | ");
                 } else {
                     System.out.print("  ");
                 }
             }
             System.out.println();
         }
+        System.out.println("_________________");
     }
 
     // Overridden equals and hashCode methods to test for deep equality
@@ -128,7 +134,9 @@ public class ChessBoard {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessBoard that = (ChessBoard) o;
+        printBoard();
         System.out.println(Arrays.deepToString(board) + "\n^^ This board == Test Board vv\n" + Arrays.deepToString(that.board));
+        that.printBoard();
         return Arrays.deepEquals(board, that.board);
     }
 

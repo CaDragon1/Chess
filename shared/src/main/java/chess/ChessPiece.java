@@ -48,11 +48,10 @@ public class ChessPiece {
     // Overridden equals and hashCode methods to test for deep equality
     @Override
     public boolean equals(Object o) {
-        System.out.println("Bink");
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessPiece that = (ChessPiece) o;
-        System.out.println("bonk");
+        System.out.println(color + " " + piece + " =? " + that.color + " " + that.piece);
         return color == that.color && piece == that.piece;
     }
 
