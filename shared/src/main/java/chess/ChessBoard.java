@@ -25,9 +25,9 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        if(position.colValue >= 0 && position.rowValue >= 0) {
-            if(position.colValue < 8 && position.rowValue < 8) {
-                board[position.getRow()][position.getColumn()] = piece;
+        if(position.colValue > 0 && position.rowValue > 0) {
+            if(position.colValue <= 8 && position.rowValue <= 8) {
+                board[position.getRow() - 1][position.getColumn() - 1] = piece;
             }
         }
     }
@@ -40,7 +40,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return board[position.getRow()][position.getColumn()];
+        return board[position.getRow() - 1][position.getColumn() - 1];
     }
 
     /**
@@ -51,10 +51,10 @@ public class ChessBoard {
         clearBoard();
         System.out.println("Board cleared. Current state:");
         printBoard();
-        setBackRow(ChessGame.TeamColor.BLACK, 0);
-        setPawns(ChessGame.TeamColor.BLACK, 1);
-        setPawns(ChessGame.TeamColor.WHITE, 6);
-        setBackRow(ChessGame.TeamColor.WHITE, 7);
+        setBackRow(ChessGame.TeamColor.BLACK, 7);
+        setPawns(ChessGame.TeamColor.BLACK, 6);
+        setPawns(ChessGame.TeamColor.WHITE, 1);
+        setBackRow(ChessGame.TeamColor.WHITE, 0);
         System.out.println("Board reset. Current state:");
         printBoard();
     }
@@ -100,7 +100,7 @@ public class ChessBoard {
     // Additional function to print the board state for testing purposes.
     public void printBoard () {
         System.out.println("Printing board:\n________________");
-        for (int row = 0; row < 8; row++) {
+        for (int row = 7; row >= 0; row--) {
             for (int column = 0; column < 8; column++) {
                 /*if (board[row][column] != null) {
                     if (board[row][column].piece == ChessPiece.PieceType.PAWN) {
