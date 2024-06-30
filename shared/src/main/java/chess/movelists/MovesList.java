@@ -12,6 +12,8 @@ abstract class MovesList {
     protected ChessBoard board;
     protected ChessPosition position;
     protected ArrayList<ChessMove> pieceMoves;
+    protected ChessPosition checkingPosition;
+    protected ChessMove possibleMove;
 
     // Constructor to set variables used by all subclasses
     MovesList(ChessBoard board, ChessPosition currentPosition) {
@@ -20,5 +22,7 @@ abstract class MovesList {
     }
 
     // Calculate Move will add to the ArrayList every possible move the piece can make.
-    abstract ChessMove calculateMove(ChessPosition myPosition);
+    abstract void calculateMove(ChessPosition myPosition);
+    // getPossibleMoves will return the ArrayList of possible moves.
+    abstract ArrayList<ChessMove> getPossibleMoves(ChessPosition myPosition);
 }
