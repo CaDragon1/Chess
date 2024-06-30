@@ -49,14 +49,14 @@ public class ChessBoard {
      */
     public void resetBoard() {
         clearBoard();
-        System.out.println("Board cleared. Current state:");
-        printBoard();
+        /*System.out.println("Board cleared. Current state:");
+        printBoard();*/
         setBackRow(ChessGame.TeamColor.BLACK, 7);
         setPawns(ChessGame.TeamColor.BLACK, 6);
         setPawns(ChessGame.TeamColor.WHITE, 1);
         setBackRow(ChessGame.TeamColor.WHITE, 0);
-        System.out.println("Board reset. Current state:");
-        printBoard();
+        /*System.out.println("Board reset. Current state:");
+        printBoard();*/
     }
 
     //This function clears the board entirely.
@@ -135,7 +135,8 @@ public class ChessBoard {
         if (o == null || getClass() != o.getClass()) return false;
         ChessBoard that = (ChessBoard) o;
         printBoard();
-        System.out.println(Arrays.deepToString(board) + "\n^^ This board == Test Board vv\n" + Arrays.deepToString(that.board));
+        System.out.println(Arrays.deepToString(board) + "\n^^ This board == Test Board vv\n"
+                + Arrays.deepToString(that.board));
         that.printBoard();
         return Arrays.deepEquals(board, that.board);
     }
