@@ -5,11 +5,12 @@ import chess.ChessMove;
 import chess.ChessPosition;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class KnightMovesList extends MovesList {
-    KnightMovesList(ChessBoard board, ChessPosition currentPosition) {
+    public KnightMovesList(ChessBoard board, ChessPosition currentPosition) {
         super(board, currentPosition);
-        pieceMoves = new ArrayList<ChessMove>();
+        pieceMoves = new HashSet<ChessMove>();
         possibleMove = new ChessMove();
         checkingPosition = new ChessPosition();
         calculateMove(currentPosition);
@@ -44,7 +45,7 @@ public class KnightMovesList extends MovesList {
     }
 
     @Override
-    ArrayList<ChessMove> getPossibleMoves(ChessPosition myPosition) {
+    public HashSet<ChessMove> getPossibleMoves() {
         return pieceMoves;
     }
 }

@@ -11,6 +11,7 @@ import java.util.Set;
 public class TestUtilities {
     static public void validateMoves(String boardText, ChessPosition startPosition, int[][] endPositions) {
         var board = loadBoard(boardText);
+
         var testPiece = board.getPiece(startPosition);
         var validMoves = loadMoves(startPosition, endPositions);
         validateMoves(board, testPiece, startPosition, validMoves);

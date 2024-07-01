@@ -3,12 +3,13 @@ package chess.movelists;
 import chess.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 // This is the move list calculator for the pawn.
 public class PawnMovesList extends MovesList {
-    PawnMovesList(ChessBoard board, ChessPosition currentPosition) {
+    public PawnMovesList(ChessBoard board, ChessPosition currentPosition) {
         super(board, currentPosition);
-        pieceMoves = new ArrayList<ChessMove>();
+        pieceMoves = new HashSet<ChessMove>();
         possibleMove = new ChessMove();
         calculateMove(currentPosition);
     }
@@ -37,7 +38,7 @@ public class PawnMovesList extends MovesList {
     }
 
     @Override
-    ArrayList<ChessMove> getPossibleMoves(ChessPosition myPosition) {
+    public HashSet<ChessMove> getPossibleMoves() {
         return pieceMoves;
     }
 }

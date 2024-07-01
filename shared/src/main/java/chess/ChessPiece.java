@@ -1,8 +1,8 @@
 package chess;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
+import chess.movelists.*;
+
+import java.util.*;
 
 /**
  * Represents a single chess piece
@@ -14,7 +14,7 @@ public class ChessPiece {
 
     ChessGame.TeamColor color;
     PieceType piece;
-    private Collection<ChessMove> moves;
+    private Set<ChessMove> moves;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         color = pieceColor;
@@ -70,7 +70,28 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        moves = new ArrayList<ChessMove>();
+        moves = new HashSet<ChessMove>();
+        MovesList moveList;
+        switch (piece) {
+            case KING:
+                moveList = new KingMovesList(board, myPosition);
+                moves = moveList.getPossibleMoves();
+            case PAWN:
+                moveList = new PawnMovesList(board, myPosition);
+                moves = moveList.getPossibleMoves();
+            case ROOK:
+                moveList = new RookMovesList(board, myPosition);
+                moves = moveList.getPossibleMoves();
+            case BISHOP:
+                moveList = new BishopMovesList(board, myPosition);
+                moves = moveList.getPossibleMoves();
+            case KNIGHT:
+                moveList = new KnightMovesList(board, myPosition);
+                moves = moveList.getPossibleMoves();
+            case QUEEN:
+                moveList = new QueenMovesList(board, myPosition);
+                moves = moveList.getPossibleMoves();
+        }
         return moves;
     }
 }

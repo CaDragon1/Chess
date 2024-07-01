@@ -5,14 +5,15 @@ import chess.ChessMove;
 import chess.ChessPosition;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 // Move list calculator for the rook
 public class RookMovesList extends MovesList{
     boolean continueChecking = false;
 
-    RookMovesList(ChessBoard board, ChessPosition currentPosition) {
+    public RookMovesList(ChessBoard board, ChessPosition currentPosition) {
         super(board, currentPosition);
-        pieceMoves = new ArrayList<ChessMove>();
+        pieceMoves = new HashSet<ChessMove>();
         possibleMove = new ChessMove();
         checkingPosition = new ChessPosition();
         calculateMove(currentPosition);
@@ -100,7 +101,7 @@ public class RookMovesList extends MovesList{
     }
 
     @Override
-    ArrayList<ChessMove> getPossibleMoves(ChessPosition myPosition) {
+    public HashSet<ChessMove> getPossibleMoves() {
         return pieceMoves;
     }
 }

@@ -5,14 +5,15 @@ import chess.ChessMove;
 import chess.ChessPosition;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 // Move list calculator for the bishop
 public class BishopMovesList extends MovesList {
     boolean continueChecking = false;
 
-    BishopMovesList(ChessBoard board, ChessPosition currentPosition) {
+    public BishopMovesList(ChessBoard board, ChessPosition currentPosition) {
         super(board, currentPosition);
-        pieceMoves = new ArrayList<ChessMove>();
+        pieceMoves = new HashSet<ChessMove>();
         possibleMove = new ChessMove();
         checkingPosition = new ChessPosition();
         calculateMove(currentPosition);
@@ -159,7 +160,7 @@ public class BishopMovesList extends MovesList {
 
 
     @Override
-    ArrayList<ChessMove> getPossibleMoves(ChessPosition myPosition) {
+    public HashSet<ChessMove> getPossibleMoves() {
         return pieceMoves;
     }
 }
