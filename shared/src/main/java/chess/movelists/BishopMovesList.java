@@ -15,11 +15,15 @@ public class BishopMovesList extends MovesList {
         pieceMoves = new ArrayList<ChessMove>();
         possibleMove = new ChessMove();
         checkingPosition = new ChessPosition();
+        calculateMove(currentPosition);
     }
 
     @Override
     void calculateMove(ChessPosition myPosition) {
-
+        checkUpLeft(myPosition);
+        checkUpRight(myPosition);
+        checkDownLeft(myPosition);
+        checkDownRight(myPosition);
     }
 
     // Calculate the up-left diagonal
