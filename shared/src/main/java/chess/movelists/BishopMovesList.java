@@ -98,7 +98,11 @@ public class BishopMovesList extends MovesList {
     // These functions are a little messy. Given more time I'd like to rework them
     // Check up left diagonal
     boolean checkingLogicUpLeft(int row, int column, ChessPosition myPosition,boolean continueChecking) {
-        addMove(row, column,myPosition);
+        // If the position is empty or occupied by a piece of different color, add the move to the list.
+        if (board.getPiece(checkingPosition) == null
+                || board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
+            addMove(row, column,myPosition);
+        }
         // Three things must be true in order to continue checking. There can't be a piece in that position on the
         // board, the row must not be equal to 8, and the column must not be equal to 1.
         if (board.getPiece(checkingPosition) != null && row != 8 && column != 1) {
@@ -144,9 +148,13 @@ public class BishopMovesList extends MovesList {
     void addMove(int row, int column, ChessPosition myPosition){
         checkingPosition.setRowValue(row);
         checkingPosition.setColValue(column);
-        possibleMove.setStart(myPosition);
-        possibleMove.setEnd(checkingPosition);
-        pieceMoves.add(possibleMove);
+        // If the position is empty or occupied by a piece of different color, add the move to the list.
+        if (board.getPiece(checkingPosition) == null
+                || board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
+            possibleMove.setStart(myPosition);
+            possibleMove.setEnd(checkingPosition);
+            pieceMoves.add(possibleMove);
+        }
     }
 
 

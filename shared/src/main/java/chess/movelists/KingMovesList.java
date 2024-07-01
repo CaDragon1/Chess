@@ -26,8 +26,9 @@ public class KingMovesList extends MovesList {
                 if(row != 9 || col != 0){
                     checkingPosition.setRowValue(row);
                     checkingPosition.setColValue(col);
-                    // Don't add the king's position to the list
-                    if(!checkingPosition.equals(myPosition)){
+                    // Don't add the king's position to the list or any piece occupied by team pieces
+                    if(!checkingPosition.equals(myPosition)
+                            && board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
                         possibleMove.setStart(myPosition);
                         possibleMove.setEnd(checkingPosition);
                         pieceMoves.add(possibleMove);

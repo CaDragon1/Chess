@@ -212,9 +212,13 @@ public class QueenMovesList extends MovesList {
 
     // Method for setting the possible move variable and adding it to the list of possible moves
     void addMove(ChessPosition myPosition, ChessPosition newPosition) {
-        possibleMove.setStart(myPosition);
-        possibleMove.setEnd(newPosition);
-        pieceMoves.add(possibleMove);
+        // If the position is empty or occupied by a piece of different color, add the move to the list.
+        if (board.getPiece(checkingPosition) == null
+                || board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
+            possibleMove.setStart(myPosition);
+            possibleMove.setEnd(checkingPosition);
+            pieceMoves.add(possibleMove);
+        }
     }
     @Override
     ArrayList<ChessMove> getPossibleMoves(ChessPosition myPosition) {
