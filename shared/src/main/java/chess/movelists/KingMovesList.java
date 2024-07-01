@@ -29,7 +29,7 @@ public class KingMovesList extends MovesList {
                     // Don't add the king's position to the list
                     if(!checkingPosition.equals(myPosition)){
                         possibleMove.setStart(myPosition);
-                        possibleMove.setEnd(myPosition);
+                        possibleMove.setEnd(checkingPosition);
                         pieceMoves.add(possibleMove);
                     }
                 }
