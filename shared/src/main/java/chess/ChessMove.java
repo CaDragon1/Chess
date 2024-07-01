@@ -12,6 +12,12 @@ public class ChessMove {
     private ChessPosition end;
     private ChessPiece.PieceType piece = null;
 
+    // Default constructor
+    public ChessMove(){
+        start = null;
+        end = null;
+    }
+    // Full instantiation constructor
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
         start = startPosition;
@@ -23,18 +29,23 @@ public class ChessMove {
      * @return ChessPosition of starting location
      */
     public ChessPosition getStartPosition() {
-
         return start;
+    }
+    // Sets start position
+    public void setStart(ChessPosition startPosition) {
+        this.start = startPosition;
     }
 
     /**
      * @return ChessPosition of ending location
      */
     public ChessPosition getEndPosition() {
-
         return end;
     }
-
+    // Sets end position
+    public void setEnd(ChessPosition endPosition) {
+        this.end = endPosition;
+    }
     /**
      * Gets the type of piece to promote a pawn to if pawn promotion is part of this
      * chess move
@@ -43,5 +54,9 @@ public class ChessMove {
      */
     public ChessPiece.PieceType getPromotionPiece() {
         return piece;
+    }
+    // Sets promotion piece
+    public void setPromotionPiece(ChessPiece.PieceType promotionPiece) {
+        this.piece = promotionPiece;
     }
 }

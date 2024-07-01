@@ -9,10 +9,13 @@ public class PawnMovesList extends MovesList {
     PawnMovesList(ChessBoard board, ChessPosition currentPosition) {
         super(board, currentPosition);
         pieceMoves = new ArrayList<ChessMove>();
+        possibleMove = new ChessMove();
+        calculateMove(currentPosition);
     }
 
-    // We need to check the space in front of the pawn (+1 if white, -1 if black) and see if it is 1. a space on the
-    // board, and 2. there is no piece in front of the pawn. Then we append that space to our array list.
+    // We need to check the space in front of the pawn (+1 if white, -1 if black) and see if it is 1) a space on the
+    // board, and 2) there is no piece in front of the pawn. Then we append that space to our array list.
+    // Only pawns move unidirectionally, so only pawns require a teamColor check.
     @Override
     void calculateMove(ChessPosition myPosition) {
         // Check if white

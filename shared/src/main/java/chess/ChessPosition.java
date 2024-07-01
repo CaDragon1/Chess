@@ -12,6 +12,12 @@ public class ChessPosition {
     int rowValue;
     int colValue;
 
+    // Default constructor
+    public ChessPosition() {
+        rowValue = 0;
+        colValue = 0;
+    }
+    // Full instantiation constructor
     public ChessPosition(int row, int col) {
         rowValue = row;
         colValue = col;
@@ -24,6 +30,10 @@ public class ChessPosition {
     public int getRow() {
         return rowValue;
     }
+    // Set row value
+    public void setRowValue(int rowValue) {
+        this.rowValue = rowValue;
+    }
 
     /**
      * @return which column this position is in
@@ -32,11 +42,14 @@ public class ChessPosition {
     public int getColumn() {
         return colValue;
     }
+    // Set column value
+    public void setColValue(int colValue) {
+        this.colValue = colValue;
+    }
 
     // Overridden equals and hashCode methods to test for deep equality
     @Override
     public boolean equals(Object o) {
-        System.out.println("what?");
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessPosition that = (ChessPosition) o;
