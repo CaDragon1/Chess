@@ -218,6 +218,7 @@ public class QueenMovesList extends MovesList {
     }
     @Override
     ArrayList<ChessMove> getPossibleMoves(ChessPosition myPosition) {
-        return null;
+
+        return pieceMoves;
     }
 }

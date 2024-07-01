@@ -8,7 +8,7 @@ import chess.ChessPosition;
 import java.util.ArrayList;
 
 // This abstract class will be the framework for every individual chess piece MoveList class.
-abstract class MovesList {
+public abstract class MovesList {
     protected ChessBoard board;
     protected ChessPosition position;
     protected ArrayList<ChessMove> pieceMoves;

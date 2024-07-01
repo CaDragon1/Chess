@@ -15,6 +15,7 @@ public class RookMovesList extends MovesList{
         pieceMoves = new ArrayList<ChessMove>();
         possibleMove = new ChessMove();
         checkingPosition = new ChessPosition();
+        calculateMove(currentPosition);
     }
 
     // Calculate moves for the rook (left, right, up, down)
@@ -90,7 +91,7 @@ public class RookMovesList extends MovesList{
     // Method for setting the possible move variable and adding it to the list of possible moves
     void addMove(ChessPosition myPosition, ChessPosition newPosition) {
         possibleMove.setStart(myPosition);
-        possibleMove.setEnd(checkingPosition);
+        possibleMove.setEnd(newPosition);
         pieceMoves.add(possibleMove);
     }
 
