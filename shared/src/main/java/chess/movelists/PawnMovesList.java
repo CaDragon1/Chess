@@ -101,12 +101,12 @@ public class PawnMovesList extends MovesList {
     }
 
     private void addingMove(ChessPosition myPosition, ChessPosition checkingPosition) {
-        System.out.print("ADDING MOVE\n--Piece in checking position: \n");
+        System.out.print("ADDING MOVE\n");
         if (board.getPiece(checkingPosition) != null ){
             System.out.println(board.getPiece(checkingPosition).getTeamColor() + " " + board.getPiece(checkingPosition).getPieceType());
         }
         //possibleMove = new ChessMove(myPosition, checkingPosition, null);
-        pieceMoves.add(new ChessMove(myPosition, checkingPosition, null));
+        pieceMoves.add(new ChessMove(myPosition, new ChessPosition(checkingPosition.getRow(), checkingPosition.getColumn()), null));
         System.out.println("--Added new move: (" + checkingPosition.getRow() + ", " + checkingPosition.getColumn() + ")");
         System.out.println("--Piece color: " + board.getPiece(myPosition).getTeamColor() + " Piece position: (" + myPosition.getRow() + ", " + myPosition.getColumn() + ")\n");
         printList();
@@ -121,7 +121,7 @@ public class PawnMovesList extends MovesList {
                     && board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
                 System.out.println("    Can Attack");
                 //possibleMove = new ChessMove(myPosition, checkingPosition, null);
-                pieceMoves.add(new ChessMove(myPosition, checkingPosition, null));
+                pieceMoves.add(new ChessMove(myPosition, new ChessPosition(checkingPosition.getRow(), checkingPosition.getColumn()), null));
             }
         }
         System.out.println("Checking column+1:");
@@ -131,7 +131,7 @@ public class PawnMovesList extends MovesList {
                     && board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
                 System.out.println("    Can attack");
                 //possibleMove = new ChessMove(myPosition, checkingPosition, null);
-                pieceMoves.add(new ChessMove(myPosition, checkingPosition, null));
+                pieceMoves.add(new ChessMove(myPosition, new ChessPosition(checkingPosition.getRow(), checkingPosition.getColumn()), null));
             }
         }
     }

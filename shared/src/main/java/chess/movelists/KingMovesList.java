@@ -20,16 +20,17 @@ public class KingMovesList extends MovesList {
         // Iterate through rows around king
         for(int row = myPosition.getRow() + 1; row >= myPosition.getRow() - 1; row--) {
             // Iterate through columns around king
+            System.out.println("ROW " + row);
             for(int col = myPosition.getColumn() - 1; col <= myPosition.getColumn() + 1; col++) {
+                ChessPosition checkingPosition = new ChessPosition(row, col);
                 // Check that row and column are valid indexes
                 if(row < 9 && row > 0 && col < 9 && col > 0){
-                    ChessPosition checkingPosition = new ChessPosition(row, col);
-                    System.out.println("Checking (" + row + "," + col + ")");
+                    System.out.println("Checking (" + row + "," + col + "): ");
                     // Don't add the king's position to the list or any piece occupied by team pieces
                     if(!checkingPosition.equals(myPosition)){
                         if (board.getPiece(checkingPosition) == null || board.getPiece(checkingPosition).getTeamColor()
                                 != board.getPiece(myPosition).getTeamColor()) {
-                            addElement(myPosition, checkingPosition);
+                            addElement(myPosition, row, col);
                         }
                     }
                 }
@@ -44,10 +45,10 @@ public class KingMovesList extends MovesList {
         //}
     }
 
-    public void addElement(ChessPosition myPosition, ChessPosition checkingPosition){
+    public void addElement(ChessPosition myPosition, int row, int col){
 
         System.out.println("Possible move added: ");
-        pieceMoves.add(new ChessMove(myPosition, checkingPosition, null));
+        pieceMoves.add(new ChessMove(myPosition, new ChessPosition(row, col), null));
         printList();
     }
 

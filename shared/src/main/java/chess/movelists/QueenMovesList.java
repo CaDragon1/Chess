@@ -71,7 +71,7 @@ public class QueenMovesList extends MovesList {
         while(continueChecking) {
             if(row > 1 && column > 1) {
                 row--;
-                column++;
+                column--;
                 continueChecking = checkingLogicDownLeft(row, column, myPosition, continueChecking);
             }
             else {

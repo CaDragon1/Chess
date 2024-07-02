@@ -35,14 +35,14 @@ public class BishopMovesList extends MovesList {
     // Calculate the up-left diagonal
     void checkUpLeft(ChessPosition myPosition) {
         continueChecking = true;
-        int row = myPosition.getRow();
-        int column = myPosition.getColumn();
+        int row = myPosition.getRow() + 1;
+        int column = myPosition.getColumn() - 1;
         while(continueChecking) {
-            if(row < 8 && column > 1) {
-                row++;
-                column--;
+            if(row <= 8 && column >= 1) {
                 continueChecking = checkingLogicUpLeft(row, column, myPosition, continueChecking);
                 System.out.println("   checkUpLeft row: " + row + " column: " + column);
+                row++;
+                column--;
             }
             else {
                 continueChecking = false;
@@ -53,14 +53,14 @@ public class BishopMovesList extends MovesList {
     // Calculate the up-right diagonal
     void checkUpRight(ChessPosition myPosition) {
         continueChecking = true;
-        int row = myPosition.getRow();
-        int column = myPosition.getColumn();
+        int row = myPosition.getRow() + 1;
+        int column = myPosition.getColumn() + 1;
         while(continueChecking) {
-            if(row < 8 && column < 8) {
-                row++;
-                column++;
+            if(row <= 8 && column <= 8) {
                 continueChecking = checkingLogicUpRight(row, column, myPosition, continueChecking);
                 System.out.println("   checkUpRight row: " + row + " column: " + column);
+                row++;
+                column++;
             }
             else {
                 continueChecking = false;
@@ -71,14 +71,14 @@ public class BishopMovesList extends MovesList {
     // Calculate the down-left diagonal
     void checkDownLeft(ChessPosition myPosition) {
         continueChecking = true;
-        int row = myPosition.getRow();
-        int column = myPosition.getColumn();
+        int row = myPosition.getRow() - 1;
+        int column = myPosition.getColumn() - 1;
         while(continueChecking) {
-            if(row > 1 && column > 1) {
-                row--;
-                column--;
+            if(row >= 1 && column >= 1) {
                 continueChecking = checkingLogicDownLeft(row, column, myPosition, continueChecking);
                 System.out.println("   checkDownLeft row: " + row + " column: " + column);
+                row--;
+                column--;
             }
             else {
                 continueChecking = false;
@@ -89,14 +89,14 @@ public class BishopMovesList extends MovesList {
     // Calculate the down-right diagonal
     void checkDownRight(ChessPosition myPosition) {
         continueChecking = true;
-        int row = myPosition.getRow();
-        int column = myPosition.getColumn();
+        int row = myPosition.getRow() - 1;
+        int column = myPosition.getColumn() + 1;
         while(continueChecking) {
-            if(row != 1 && column != 8) {
-                row--;
-                column++;
+            if(row >= 1 && column <= 8) {
                 continueChecking = checkingLogicDownRight(row, column, myPosition, continueChecking);
                 System.out.println("   checkDownRight row: " + row + " column: " + column);
+                row--;
+                column++;
             }
             else {
                 continueChecking = false;
