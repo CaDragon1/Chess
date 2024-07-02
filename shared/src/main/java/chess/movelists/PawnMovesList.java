@@ -90,9 +90,9 @@ public class PawnMovesList extends MovesList {
                 System.out.println("    Pawn cannot move forward");
             }
             // Check to see if you can attack
-            if (checkingPosition.getRow() <= 8) {
+            checkingPosition.setRowValue(myPosition.getRow() - 1);
+            if (checkingPosition.getRow() >= 1) {
                 System.out.println("Checking attack angles:");
-                checkingPosition.setRowValue(myPosition.getRow() + 1);
                 attack(myPosition, checkingPosition);
             }
         }
@@ -117,6 +117,7 @@ public class PawnMovesList extends MovesList {
         System.out.println("Checking column-1:");
         if(myPosition.getColumn() > 1) {
             checkingPosition.setColValue(myPosition.getColumn() - 1);
+
             if(board.getPiece(checkingPosition) != null
                     && board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
                 System.out.println("    Can Attack");
@@ -126,7 +127,7 @@ public class PawnMovesList extends MovesList {
         }
         System.out.println("Checking column+1:");
         if(myPosition.getColumn() < 8) {
-            checkingPosition.setRowValue(myPosition.getRow() + 1);
+            checkingPosition.setColValue(myPosition.getColumn() + 1);
             if(board.getPiece(checkingPosition) != null
                     && board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
                 System.out.println("    Can attack");
