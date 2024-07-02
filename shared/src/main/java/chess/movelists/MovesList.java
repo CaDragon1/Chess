@@ -7,6 +7,7 @@ import chess.ChessPosition;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Objects;
 
 // This abstract class will be the framework for every individual chess piece MoveList class.
 public abstract class MovesList {
@@ -26,4 +27,16 @@ public abstract class MovesList {
     abstract void calculateMove(ChessPosition myPosition);
     // getPossibleMoves will return the ArrayList of possible moves.
     public abstract HashSet<ChessMove> getPossibleMoves();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MovesList movesList)) return false;
+        return Objects.deepEquals(pieceMoves, movesList.pieceMoves);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(pieceMoves);
+    }
 }

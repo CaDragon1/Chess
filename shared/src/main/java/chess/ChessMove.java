@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Represents moving a chess piece on a chessboard
@@ -13,6 +14,7 @@ public class ChessMove {
     private ChessPosition start;
     private ChessPosition end;
     private ChessPiece.PieceType piece = null;
+
 
     // Default constructor
     public ChessMove(){

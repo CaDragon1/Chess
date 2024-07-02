@@ -14,6 +14,7 @@ public class KingMovesList extends MovesList {
         possibleMove = new ChessMove();
         checkingPosition = new ChessPosition();
         calculateMove(currentPosition);
+        System.out.println("King moves initialized");
     }
 
     // Calculate moves for the king in a box around him.
@@ -39,8 +40,16 @@ public class KingMovesList extends MovesList {
         }
     }
 
+    public void printList(){
+        System.out.println("Printing list of king moves:");
+        for(ChessMove element : pieceMoves){
+            System.out.println("start (" + element.getStartPosition() + "), end (" + element.getEndPosition() + ")");
+        }
+    }
+
     @Override
     public HashSet<ChessMove> getPossibleMoves() {
+        System.out.println("Returning king moves");
         return pieceMoves;
     }
 

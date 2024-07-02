@@ -72,25 +72,32 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         moves = new HashSet<ChessMove>();
         MovesList moveList;
+        piece = board.getPiece(myPosition).getPieceType();
         switch (piece) {
             case KING:
                 moveList = new KingMovesList(board, myPosition);
                 moves = moveList.getPossibleMoves();
+                break;
             case PAWN:
                 moveList = new PawnMovesList(board, myPosition);
                 moves = moveList.getPossibleMoves();
+                break;
             case ROOK:
                 moveList = new RookMovesList(board, myPosition);
                 moves = moveList.getPossibleMoves();
+                break;
             case BISHOP:
                 moveList = new BishopMovesList(board, myPosition);
                 moves = moveList.getPossibleMoves();
+                break;
             case KNIGHT:
                 moveList = new KnightMovesList(board, myPosition);
                 moves = moveList.getPossibleMoves();
+                break;
             case QUEEN:
                 moveList = new QueenMovesList(board, myPosition);
                 moves = moveList.getPossibleMoves();
+                break;
         }
         return moves;
     }
