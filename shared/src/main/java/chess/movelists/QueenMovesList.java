@@ -4,7 +4,6 @@ import chess.ChessBoard;
 import chess.ChessMove;
 import chess.ChessPosition;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 public class QueenMovesList extends MovesList {
@@ -12,8 +11,8 @@ public class QueenMovesList extends MovesList {
     public QueenMovesList(ChessBoard board, ChessPosition currentPosition) {
         super(board, currentPosition);
         pieceMoves = new HashSet<ChessMove>();
-        possibleMove = new ChessMove();
-        checkingPosition = new ChessPosition();
+        //possibleMove = new ChessMove();
+        //checkingPosition = new ChessPosition();
         calculateMove(currentPosition);
     }
 
@@ -138,7 +137,7 @@ public class QueenMovesList extends MovesList {
         addDiagonalMove(row, column,myPosition);
         // Three things must be true in order to continue checking. There can't be a piece in that position on the
         // board, the row must not be equal to 8, and the column must not be equal to 1.
-        if (board.getPiece(checkingPosition) != null && row != 8 && column != 1) {
+        if (board.getPiece(new ChessPosition(row, column)) != null && row != 8 && column != 1) {
             continueChecking = false;
         }
         return continueChecking;
@@ -149,7 +148,7 @@ public class QueenMovesList extends MovesList {
         addDiagonalMove(row, column,myPosition);
         // Three things must be true in order to continue checking. There can't be a piece in that position on the
         // board, the row must not be equal to 8, and the column must not be equal to 8.
-        if (board.getPiece(checkingPosition) != null && row != 8 && column != 8) {
+        if (board.getPiece(new ChessPosition(row, column)) != null && row != 8 && column != 8) {
             continueChecking = false;
         }
         return continueChecking;
@@ -160,7 +159,7 @@ public class QueenMovesList extends MovesList {
         addDiagonalMove(row, column,myPosition);
         // Three things must be true in order to continue checking. There can't be a piece in that position on the
         // board, the row must not be equal to 8, and the column must not be equal to 1.
-        if (board.getPiece(checkingPosition) != null && row != 1 && column != 1) {
+        if (board.getPiece(new ChessPosition(row, column)) != null && row != 1 && column != 1) {
             continueChecking = false;
         }
         return continueChecking;
@@ -171,7 +170,7 @@ public class QueenMovesList extends MovesList {
         addDiagonalMove(row, column,myPosition);
         // Three things must be true in order to continue checking. There can't be a piece in that position on the
         // board, the row must not be equal to 8, and the column must not be equal to 1.
-        if (board.getPiece(checkingPosition) != null && row != 1 && column != 8) {
+        if (board.getPiece(new ChessPosition(row, column)) != null && row != 1 && column != 8) {
             continueChecking = false;
         }
         return continueChecking;
@@ -179,46 +178,40 @@ public class QueenMovesList extends MovesList {
 
     // Logic to add a move to the list
     void addDiagonalMove(int row, int column, ChessPosition myPosition){
-        checkingPosition.setRowValue(row);
-        checkingPosition.setColValue(column);
-        addMove(myPosition, checkingPosition);
+        addMove(myPosition, new ChessPosition(row, column));
     }
 
     /** Methods for adding horizontal moves to the index */
     // Method for adding new row positions to the array list
     void getRowMoves(ChessPosition myPosition, int column) {
         if(continueChecking) {
-            checkingPosition.setColValue(column);
-            checkingPosition.setRowValue(myPosition.getRow());
             // If there is another piece there, we stop adding moves to the array list.
-            if (board.getPiece(checkingPosition) != null) {
+            if (board.getPiece(new ChessPosition(myPosition.getRow(), column)) != null) {
                 continueChecking = false;
             }
-            addMove(myPosition, checkingPosition);
+            addMove(myPosition, new ChessPosition(myPosition.getRow(), column));
         }
     }
 
     // Method for adding new column positions to the array list
     void getColumnMoves(ChessPosition myPosition, int row) {
         if(continueChecking) {
-            checkingPosition.setRowValue(row);
-            checkingPosition.setColValue(myPosition.getColumn());
             // If there is another piece there, we stop adding moves to the array list.
-            if (board.getPiece(checkingPosition) != null) {
+            if (board.getPiece(new ChessPosition(row, myPosition.getColumn())) != null) {
                 continueChecking = false;
             }
-            addMove(myPosition, checkingPosition);
+            addMove(myPosition, new ChessPosition(row, myPosition.getColumn()));
         }
     }
 
     // Method for setting the possible move variable and adding it to the list of possible moves
     void addMove(ChessPosition myPosition, ChessPosition newPosition) {
         // If the position is empty or occupied by a piece of different color, add the move to the list.
-        if (board.getPiece(checkingPosition) == null
-                || board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
-            possibleMove.setStart(myPosition);
-            possibleMove.setEnd(checkingPosition);
-            pieceMoves.add(possibleMove);
+        if (board.getPiece(newPosition) == null
+                || board.getPiece(newPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
+            //possibleMove.setStart(myPosition);
+            //possibleMove.setEnd(checkingPosition);
+            pieceMoves.add(new ChessMove(myPosition, newPosition, null));
         }
     }
     @Override

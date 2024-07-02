@@ -2,7 +2,6 @@ package chess.movelists;
 
 import chess.*;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 // This is the move list calculator for the pawn.
@@ -10,8 +9,9 @@ public class PawnMovesList extends MovesList {
     public PawnMovesList(ChessBoard board, ChessPosition currentPosition) {
         super(board, currentPosition);
         pieceMoves = new HashSet<ChessMove>();
-        possibleMove = new ChessMove();
+        //possibleMove = new ChessMove();
         calculateMove(currentPosition);
+        //ChessPosition checkingPosition = new ChessPosition();
 
     }
 
@@ -32,21 +32,23 @@ public class PawnMovesList extends MovesList {
     void calculateMove(ChessPosition myPosition) {
         System.out.println("CURRENT POSITION: (" + myPosition.getRow() + ", " + myPosition.getColumn()
                 + ") PIECE IN POSITION: " + board.getPiece(myPosition).getTeamColor() + " " + board.getPiece(myPosition).getPieceType());
+
         System.out.println("Checking if white:");
         // Check if white
+        ChessPosition checkingPosition;
         if (board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.WHITE) {
             System.out.println("    White move");
             checkingPosition = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn());
             System.out.println("Checking if pawn can move:");
             if (checkingPosition.getRow() != 9 && board.getPiece(checkingPosition) == null) {
                 System.out.println("    Pawn move");
-                addingMove(myPosition);
+                addingMove(myPosition, checkingPosition);
                 // Double move on first move
                 System.out.println("Checking if pawn can double move:");
                 checkingPosition.setRowValue(4);
                 if (myPosition.getRow() == 2 && board.getPiece(checkingPosition) == null) {
                     System.out.println("    Pawn double move");
-                    addingMove(myPosition);
+                    addingMove(myPosition, checkingPosition);
                 }
                 else if (myPosition.getRow() == 2 && board.getPiece(checkingPosition) != null) {
                     System.out.println("    Obstructed pawn move");
@@ -56,7 +58,7 @@ public class PawnMovesList extends MovesList {
             // Check to see if you can attack
             if (checkingPosition.getRow() < 8) {
                 checkingPosition.setRowValue(myPosition.getRow() + 1);
-                attack(myPosition);
+                attack(myPosition, checkingPosition);
             }
 
             // Check to see if piece can get promoted
@@ -72,13 +74,13 @@ public class PawnMovesList extends MovesList {
             System.out.println("Checking if pawn can move:");
             if (checkingPosition.getRow() != 0 && board.getPiece(checkingPosition) == null) {
                 System.out.println("    Pawn move");
-                addingMove(myPosition);
+                addingMove(myPosition, checkingPosition);
                 // Double move on first move
                 System.out.println("Checking if pawn can double move:");
                 checkingPosition.setRowValue(5);
                 if (myPosition.getRow() == 7 && board.getPiece(checkingPosition) == null) {
                     System.out.println("    Pawn double move");
-                    addingMove(myPosition);
+                    addingMove(myPosition, checkingPosition);
                 }
                 else if (myPosition.getRow() == 2 && board.getPiece(checkingPosition) != null) {
                     System.out.println("    Obstructed pawn move");
@@ -91,35 +93,35 @@ public class PawnMovesList extends MovesList {
             if (checkingPosition.getRow() <= 8) {
                 System.out.println("Checking attack angles:");
                 checkingPosition.setRowValue(myPosition.getRow() + 1);
-                attack(myPosition);
+                attack(myPosition, checkingPosition);
             }
         }
         System.out.println("    _function end_");
         printList();
     }
 
-    private void addingMove(ChessPosition myPosition) {
+    private void addingMove(ChessPosition myPosition, ChessPosition checkingPosition) {
         System.out.print("ADDING MOVE\n--Piece in checking position: \n");
         if (board.getPiece(checkingPosition) != null ){
             System.out.println(board.getPiece(checkingPosition).getTeamColor() + " " + board.getPiece(checkingPosition).getPieceType());
         }
-        possibleMove = new ChessMove(myPosition, checkingPosition, null);
-        pieceMoves.add(possibleMove);
+        //possibleMove = new ChessMove(myPosition, checkingPosition, null);
+        pieceMoves.add(new ChessMove(myPosition, checkingPosition, null));
         System.out.println("--Added new move: (" + checkingPosition.getRow() + ", " + checkingPosition.getColumn() + ")");
         System.out.println("--Piece color: " + board.getPiece(myPosition).getTeamColor() + " Piece position: (" + myPosition.getRow() + ", " + myPosition.getColumn() + ")\n");
         printList();
     }
 
     // Attack move logic: If there is a piece at the diagonal spaces, the pawn can add those spaces to its movelist.
-    public void attack(ChessPosition myPosition){
+    public void attack(ChessPosition myPosition, ChessPosition checkingPosition){
         System.out.println("Checking column-1:");
         if(myPosition.getColumn() > 1) {
             checkingPosition.setColValue(myPosition.getColumn() - 1);
             if(board.getPiece(checkingPosition) != null
                     && board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
                 System.out.println("    Can Attack");
-                possibleMove = new ChessMove(myPosition, checkingPosition, null);
-                pieceMoves.add(possibleMove);
+                //possibleMove = new ChessMove(myPosition, checkingPosition, null);
+                pieceMoves.add(new ChessMove(myPosition, checkingPosition, null));
             }
         }
         System.out.println("Checking column+1:");
@@ -128,8 +130,8 @@ public class PawnMovesList extends MovesList {
             if(board.getPiece(checkingPosition) != null
                     && board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
                 System.out.println("    Can attack");
-                possibleMove = new ChessMove(myPosition, checkingPosition, null);
-                pieceMoves.add(possibleMove);
+                //possibleMove = new ChessMove(myPosition, checkingPosition, null);
+                pieceMoves.add(new ChessMove(myPosition, checkingPosition, null));
             }
         }
     }

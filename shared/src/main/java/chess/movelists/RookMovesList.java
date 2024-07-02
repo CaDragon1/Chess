@@ -4,7 +4,6 @@ import chess.ChessBoard;
 import chess.ChessMove;
 import chess.ChessPosition;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 // Move list calculator for the rook
@@ -14,8 +13,8 @@ public class RookMovesList extends MovesList{
     public RookMovesList(ChessBoard board, ChessPosition currentPosition) {
         super(board, currentPosition);
         pieceMoves = new HashSet<ChessMove>();
-        possibleMove = new ChessMove();
-        checkingPosition = new ChessPosition();
+        //possibleMove = new ChessMove();
+        //checkingPosition = new ChessPosition();
         calculateMove(currentPosition);
     }
 
@@ -66,8 +65,7 @@ public class RookMovesList extends MovesList{
     // Method for adding new row positions to the array list
     void getRowMoves(ChessPosition myPosition, int column) {
         if(continueChecking) {
-            checkingPosition.setColValue(column);
-            checkingPosition.setRowValue(myPosition.getRow());
+            ChessPosition checkingPosition = new ChessPosition(myPosition.getRow(), column);
             // If there is another piece there, we stop adding moves to the array list.
             if (board.getPiece(checkingPosition) != null) {
                 continueChecking = false;
@@ -79,6 +77,7 @@ public class RookMovesList extends MovesList{
     // Method for adding new column positions to the array list
     void getColumnMoves(ChessPosition myPosition, int row) {
         if(continueChecking) {
+            ChessPosition checkingPosition = new ChessPosition(row, myPosition.getColumn());
             checkingPosition.setRowValue(row);
             checkingPosition.setColValue(myPosition.getColumn());
             // If there is another piece there, we stop adding moves to the array list.
@@ -92,11 +91,11 @@ public class RookMovesList extends MovesList{
     // Method for setting the possible move variable and adding it to the list of possible moves
     void addMove(ChessPosition myPosition, ChessPosition newPosition) {
         // If the position is empty or occupied by a piece of different color, add the move to the list.
-        if (board.getPiece(checkingPosition) == null
-                || board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
-            possibleMove.setStart(myPosition);
-            possibleMove.setEnd(checkingPosition);
-            pieceMoves.add(possibleMove);
+        if (board.getPiece(newPosition) == null
+                || board.getPiece(newPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
+            //possibleMove.setStart(myPosition);
+            //possibleMove.setEnd(checkingPosition);
+            pieceMoves.add(new ChessMove(myPosition, newPosition, null));
         }
     }
 

@@ -4,15 +4,12 @@ import chess.ChessBoard;
 import chess.ChessMove;
 import chess.ChessPosition;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 public class KnightMovesList extends MovesList {
     public KnightMovesList(ChessBoard board, ChessPosition currentPosition) {
         super(board, currentPosition);
         pieceMoves = new HashSet<ChessMove>();
-        possibleMove = new ChessMove();
-        checkingPosition = new ChessPosition();
         calculateMove(currentPosition);
     }
 
@@ -34,11 +31,11 @@ public class KnightMovesList extends MovesList {
             for (int row = myPosition.getRow() + 2; row <= myPosition.getRow() - 2; row--) {
                 if(Math.abs(myPosition.getColumn() - column) + Math.abs(myPosition.getRow() - row) == 3
                 && row > 0 && row <= 8 && column > 0 && column <= 8) {
-                    checkingPosition.setRowValue(row);
-                    checkingPosition.setColValue(column);
-                    possibleMove.setStart(myPosition);
-                    possibleMove.setEnd(checkingPosition);
-                    pieceMoves.add(possibleMove);
+                    ChessPosition checkingPosition = new ChessPosition(row, column);
+                    // Make sure positions aren't taken up by friendly pieces
+                    if(board.getPiece(checkingPosition) == null || board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
+                        pieceMoves.add(new ChessMove(myPosition, checkingPosition, null));
+                    }
                 }
             }
         }
