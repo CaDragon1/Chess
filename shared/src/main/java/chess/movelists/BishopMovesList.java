@@ -21,10 +21,16 @@ public class BishopMovesList extends MovesList {
 
     @Override
     void calculateMove(ChessPosition myPosition) {
+        System.out.println("Calculating moves:");
+        System.out.println("UP LEFT DIAGONAL\n");
         checkUpLeft(myPosition);
+        System.out.println("UP RIGHT DIAGONAL\n");
         checkUpRight(myPosition);
+        System.out.println("DOWN LEFT DIAGONAL\n");
         checkDownLeft(myPosition);
+        System.out.println("DOWN RIGHT DIAGONAL\n");
         checkDownRight(myPosition);
+        printList();
     }
 
     // Calculate the up-left diagonal
@@ -33,10 +39,11 @@ public class BishopMovesList extends MovesList {
         int row = myPosition.getRow();
         int column = myPosition.getColumn();
         while(continueChecking) {
-            if(row != 8 && column != 1) {
+            if(row < 8 && column > 1) {
                 row++;
                 column--;
                 continueChecking = checkingLogicUpLeft(row, column, myPosition, continueChecking);
+                System.out.println("   checkUpLeft row: " + row + " column: " + column);
             }
             else {
                 continueChecking = false;
@@ -50,10 +57,11 @@ public class BishopMovesList extends MovesList {
         int row = myPosition.getRow();
         int column = myPosition.getColumn();
         while(continueChecking) {
-            if(row != 8 && column != 8) {
+            if(row < 8 && column < 8) {
                 row++;
-                column--;
+                column++;
                 continueChecking = checkingLogicUpRight(row, column, myPosition, continueChecking);
+                System.out.println("   checkUpRight row: " + row + " column: " + column);
             }
             else {
                 continueChecking = false;
@@ -67,10 +75,11 @@ public class BishopMovesList extends MovesList {
         int row = myPosition.getRow();
         int column = myPosition.getColumn();
         while(continueChecking) {
-            if(row != 1 && column != 1) {
-                row++;
+            if(row > 1 && column > 1) {
+                row--;
                 column--;
                 continueChecking = checkingLogicDownLeft(row, column, myPosition, continueChecking);
+                System.out.println("   checkDownLeft row: " + row + " column: " + column);
             }
             else {
                 continueChecking = false;
@@ -85,9 +94,10 @@ public class BishopMovesList extends MovesList {
         int column = myPosition.getColumn();
         while(continueChecking) {
             if(row != 1 && column != 8) {
-                row++;
-                column--;
+                row--;
+                column++;
                 continueChecking = checkingLogicDownRight(row, column, myPosition, continueChecking);
+                System.out.println("   checkDownRight row: " + row + " column: " + column);
             }
             else {
                 continueChecking = false;
@@ -147,6 +157,7 @@ public class BishopMovesList extends MovesList {
 
     // Logic to add a move to the list
     void addMove(int row, int column, ChessPosition myPosition){
+        System.out.println("Adding move");
         checkingPosition.setRowValue(row);
         checkingPosition.setColValue(column);
         // If the position is empty or occupied by a piece of different color, add the move to the list.
@@ -158,6 +169,12 @@ public class BishopMovesList extends MovesList {
         }
     }
 
+    public void printList(){
+        System.out.println("Printing list of bishop moves:");
+        for(ChessMove element : pieceMoves){
+            System.out.println("start (" + element.getStartPosition() + "), end (" + element.getEndPosition() + ")");
+        }
+    }
 
     @Override
     public HashSet<ChessMove> getPossibleMoves() {

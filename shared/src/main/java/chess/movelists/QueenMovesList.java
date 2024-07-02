@@ -36,7 +36,7 @@ public class QueenMovesList extends MovesList {
         int row = myPosition.getRow();
         int column = myPosition.getColumn();
         while(continueChecking) {
-            if(row != 8 && column != 1) {
+            if(row < 8 && column > 1) {
                 row++;
                 column--;
                 continueChecking = checkingLogicUpLeft(row, column, myPosition, continueChecking);
@@ -53,9 +53,9 @@ public class QueenMovesList extends MovesList {
         int row = myPosition.getRow();
         int column = myPosition.getColumn();
         while(continueChecking) {
-            if(row != 8 && column != 8) {
+            if(row < 8 && column < 8) {
                 row++;
-                column--;
+                column++;
                 continueChecking = checkingLogicUpRight(row, column, myPosition, continueChecking);
             }
             else {
@@ -70,9 +70,9 @@ public class QueenMovesList extends MovesList {
         int row = myPosition.getRow();
         int column = myPosition.getColumn();
         while(continueChecking) {
-            if(row != 1 && column != 1) {
-                row++;
-                column--;
+            if(row > 1 && column > 1) {
+                row--;
+                column++;
                 continueChecking = checkingLogicDownLeft(row, column, myPosition, continueChecking);
             }
             else {
@@ -87,9 +87,9 @@ public class QueenMovesList extends MovesList {
         int row = myPosition.getRow();
         int column = myPosition.getColumn();
         while(continueChecking) {
-            if(row != 1 && column != 8) {
-                row++;
-                column--;
+            if(row > 1 && column < 8) {
+                row--;
+                column++;
                 continueChecking = checkingLogicDownRight(row, column, myPosition, continueChecking);
             }
             else {

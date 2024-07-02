@@ -8,7 +8,7 @@ import static passoff.chess.TestUtilities.validateMoves;
 public class QueenMoveTests {
     @Test
     public void queenMoveUntilEdge() {
-        validateMoves("""
+         validateMoves("""
                         | | | | | | | | |
                         | | | | | | |q| |
                         | | | | | | | | |
