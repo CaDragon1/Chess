@@ -50,17 +50,11 @@ public class PawnMovesList extends MovesList {
                 else{
                     addingMove(myPosition, checkingPosition);
                 }
+                // Check double move at start
+                if(myPosition.getRow() == 2) {
+                    doubleMoveCheck(myPosition, checkingPosition);
+                }
 
-                // Double move on first move
-                System.out.println("Checking if pawn can double move:");
-                checkingPosition.setRowValue(4);
-                if (myPosition.getRow() == 2 && board.getPiece(checkingPosition) == null) {
-                    System.out.println("    Pawn double move");
-                    addingMove(myPosition, checkingPosition);
-                }
-                else if (myPosition.getRow() == 2 && board.getPiece(checkingPosition) != null) {
-                    System.out.println("    Obstructed pawn move");
-                }
             }
             printList();
             // Check to see if you can attack
@@ -89,15 +83,9 @@ public class PawnMovesList extends MovesList {
                     addingMove(myPosition, checkingPosition);
                 }
 
-                // Double move on first move
-                System.out.println("Checking if pawn can double move:");
-                checkingPosition.setRowValue(5);
-                if (myPosition.getRow() == 7 && board.getPiece(checkingPosition) == null) {
-                    System.out.println("    Pawn double move");
-                    addingMove(myPosition, checkingPosition);
-                }
-                else if (myPosition.getRow() == 2 && board.getPiece(checkingPosition) != null) {
-                    System.out.println("    Obstructed pawn move");
+                // Check double move at start
+                if(myPosition.getRow() == 7) {
+                    doubleMoveCheck(myPosition, checkingPosition);
                 }
             }
             else{
@@ -112,6 +100,31 @@ public class PawnMovesList extends MovesList {
         }
         System.out.println("    _function end_");
         printList();
+    }
+
+    // Method to determine if a pawn can move twice
+    private void doubleMoveCheck(ChessPosition myPosition, ChessPosition checkingPosition) {
+        // Double move on first move
+        // Check my piece color
+        int myRow;
+        int checkRow;
+        if(board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.WHITE) {
+            myRow = 2;
+            checkRow = 4;
+        }
+        else{
+            myRow = 7;
+            checkRow = 5;
+        }
+        System.out.println("Checking if pawn can double move:");
+        checkingPosition.setRowValue(checkRow);
+        if (board.getPiece(checkingPosition) == null) {
+            System.out.println("    Pawn double move");
+            addingMove(myPosition, checkingPosition);
+        }
+        else if (board.getPiece(checkingPosition) != null) {
+            System.out.println("    Obstructed pawn move");
+        }
     }
 
     private void addingMove(ChessPosition myPosition, ChessPosition checkingPosition) {
@@ -142,6 +155,7 @@ public class PawnMovesList extends MovesList {
 
     // Attack move logic: If there is a piece at the diagonal spaces, the pawn can add those spaces to its movelist.
     public void attack(ChessPosition myPosition, ChessPosition checkingPosition){
+
         System.out.println("Checking column-1:");
         if(myPosition.getColumn() > 1) {
             checkingPosition.setColValue(myPosition.getColumn() - 1);
