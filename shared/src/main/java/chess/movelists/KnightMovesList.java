@@ -33,7 +33,7 @@ public class KnightMovesList extends MovesList {
                 System.out.println("Row: " + row);
                 if(Math.abs(myPosition.getColumn() - column) + Math.abs(myPosition.getRow() - row) == 3
                 && row > 0 && row <= 8 && column > 0 && column <= 8) {
-                    System.out.println("Checking position " + row + " , " + column);
+                    System.out.println("Checking position " + row + " , " + column + " = " + board.getPiece(new ChessPosition(row, column)));
                     ChessPosition checkingPosition = new ChessPosition(row, column);
                     // Make sure positions aren't taken up by friendly pieces
                     if(board.getPiece(checkingPosition) == null || board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()){

@@ -19,7 +19,8 @@ public class TestUtilities {
 
     static public void validateMoves(ChessBoard board, ChessPiece testPiece, ChessPosition startPosition, Set<ChessMove> validMoves) {
         var pieceMoves = new HashSet<>(testPiece.pieceMoves(board, startPosition));
-        System.out.println("   >>>> Test case: " + validMoves.toString() + " Actual case: " + pieceMoves.toString());
+        System.out.println("\n   >>>> Test case: " + validMoves.toString() + " Actual case: " + pieceMoves.toString());
+        board.printBoard();
         assertCollectionsEquals(validMoves, pieceMoves, "Wrong moves");
     }
 
