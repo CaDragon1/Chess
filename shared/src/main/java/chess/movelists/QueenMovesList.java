@@ -19,82 +19,18 @@ public class QueenMovesList extends MovesList {
     // The queen's calculate move function copies the bishop and rook methods.
     @Override
     void calculateMove(ChessPosition myPosition) {
-        checkUpLeft(myPosition);
-        checkUpRight(myPosition);
-        checkDownLeft(myPosition);
-        checkDownRight(myPosition);
+        // Check up left
+        checkDiagonal(1, -1, myPosition);
+        // Check up right
+        checkDiagonal(1, 1, myPosition);
+        // Check down left
+        checkDiagonal(-1, -1, myPosition);
+        // Check down right
+        checkDiagonal(-1, 1, myPosition);
         checkLeft(myPosition);
         checkRight(myPosition);
         checkUp(myPosition);
         checkDown(myPosition);
-    }
-
-    // Calculate the up-left diagonal
-    void checkUpLeft(ChessPosition myPosition) {
-        continueChecking = true;
-        int row = myPosition.getRow();
-        int column = myPosition.getColumn();
-        while(continueChecking) {
-            if(row < 8 && column > 1) {
-                row++;
-                column--;
-                continueChecking = checkingLogicUpLeft(row, column, myPosition, continueChecking);
-            }
-            else {
-                continueChecking = false;
-            }
-        }
-    }
-
-    // Calculate the up-right diagonal
-    void checkUpRight(ChessPosition myPosition) {
-        continueChecking = true;
-        int row = myPosition.getRow();
-        int column = myPosition.getColumn();
-        while(continueChecking) {
-            if(row < 8 && column < 8) {
-                row++;
-                column++;
-                continueChecking = checkingLogicUpRight(row, column, myPosition, continueChecking);
-            }
-            else {
-                continueChecking = false;
-            }
-        }
-    }
-
-    // Calculate the down-left diagonal
-    void checkDownLeft(ChessPosition myPosition) {
-        continueChecking = true;
-        int row = myPosition.getRow();
-        int column = myPosition.getColumn();
-        while(continueChecking) {
-            if(row > 1 && column > 1) {
-                row--;
-                column--;
-                continueChecking = checkingLogicDownLeft(row, column, myPosition, continueChecking);
-            }
-            else {
-                continueChecking = false;
-            }
-        }
-    }
-
-    // Calculate the down-right diagonal
-    void checkDownRight(ChessPosition myPosition) {
-        continueChecking = true;
-        int row = myPosition.getRow();
-        int column = myPosition.getColumn();
-        while(continueChecking) {
-            if(row > 1 && column < 8) {
-                row--;
-                column++;
-                continueChecking = checkingLogicDownRight(row, column, myPosition, continueChecking);
-            }
-            else {
-                continueChecking = false;
-            }
-        }
     }
 
     // Functions to add a valid chess move to the move list.
@@ -132,54 +68,51 @@ public class QueenMovesList extends MovesList {
         }
     }
 
-    // Check up left diagonal
-    boolean checkingLogicUpLeft(int row, int column, ChessPosition myPosition,boolean continueChecking) {
-        addDiagonalMove(row, column,myPosition);
-        // Three things must be true in order to continue checking. There can't be a piece in that position on the
-        // board, the row must not be equal to 8, and the column must not be equal to 1.
-        if (board.getPiece(new ChessPosition(row, column)) != null && row != 8 && column != 1) {
-            continueChecking = false;
+    private void checkDiagonal(int rowIncrement, int colIncrement, ChessPosition myPosition) {
+        boolean keepChecking = true;
+        int incrementer = 1;
+        // Verify that the next position is within bounds.
+        keepChecking = isInBounds(myPosition.getRow() + rowIncrement, myPosition.getColumn() + colIncrement);
+
+        ChessPosition checkingPosition = new ChessPosition(myPosition.getRow() + (incrementer * rowIncrement),
+                myPosition.getColumn() + (incrementer * colIncrement));
+        while (keepChecking) {
+            if (board.getPiece(checkingPosition) == null
+                    || board.getPiece(checkingPosition).getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
+                addDiagonalMove(checkingPosition.getRow(), checkingPosition.getColumn(), myPosition);
+                if(board.getPiece(checkingPosition) != null){
+                    keepChecking = false;
+                }
+                else{
+                    incrementer++;
+                    checkingPosition.setColValue(myPosition.getColumn() + (incrementer * colIncrement));
+                    checkingPosition.setRowValue(myPosition.getRow() + (incrementer * rowIncrement));
+                    keepChecking = isInBounds(checkingPosition.getRow(), checkingPosition.getColumn());
+                }
+            }
+            else{
+                keepChecking = false;
+            }
         }
-        return continueChecking;
     }
 
-    // Check up right diagonal
-    boolean checkingLogicUpRight(int row, int column, ChessPosition myPosition,boolean continueChecking) {
-        addDiagonalMove(row, column,myPosition);
-        // Three things must be true in order to continue checking. There can't be a piece in that position on the
-        // board, the row must not be equal to 8, and the column must not be equal to 8.
-        if (board.getPiece(new ChessPosition(row, column)) != null && row != 8 && column != 8) {
-            continueChecking = false;
+    // Make sure that the given row and column are within the bounds of the game board.
+    private boolean isInBounds(int row, int col) {
+        if(row <= 0 || row >= 9 || col <= 0 || col >= 9 ){
+            return false;
         }
-        return continueChecking;
-    }
-
-    // Check down left diagonal
-    boolean checkingLogicDownLeft(int row, int column, ChessPosition myPosition,boolean continueChecking) {
-        addDiagonalMove(row, column,myPosition);
-        // Three things must be true in order to continue checking. There can't be a piece in that position on the
-        // board, the row must not be equal to 8, and the column must not be equal to 1.
-        if (board.getPiece(new ChessPosition(row, column)) != null && row != 1 && column != 1) {
-            continueChecking = false;
+        else{
+            return true;
         }
-        return continueChecking;
-    }
-
-    // Check down right diagonal
-    boolean checkingLogicDownRight(int row, int column, ChessPosition myPosition,boolean continueChecking) {
-        addDiagonalMove(row, column,myPosition);
-        // Three things must be true in order to continue checking. There can't be a piece in that position on the
-        // board, the row must not be equal to 8, and the column must not be equal to 1.
-        if (board.getPiece(new ChessPosition(row, column)) != null && row != 1 && column != 8) {
-            continueChecking = false;
-        }
-        return continueChecking;
     }
 
     // Logic to add a move to the list
     void addDiagonalMove(int row, int column, ChessPosition myPosition){
-        addMove(myPosition, new ChessPosition(row, column));
+        ChessPosition checkingPosition = new ChessPosition(row, column);
+        System.out.println("Adding move");
+        pieceMoves.add(new ChessMove(myPosition, checkingPosition, null));
     }
+
 
     /** Methods for adding horizontal moves to the index */
     // Method for adding new row positions to the array list
