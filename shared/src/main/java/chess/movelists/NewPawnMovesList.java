@@ -36,13 +36,10 @@ public class NewPawnMovesList extends MovesList{
     // teamCalculateMove takes an int 1 if white and a -1 if black. This is multiplied by the row modifier to get
     // direction of travel.
     private void teamCalculateMove(ChessPosition myPosition, int direction) {
-        System.out.println("Attacking.");
         checkAttack(myPosition, myPosition.getRow() + (direction), myPosition.getColumn() - 1);
         checkAttack(myPosition, myPosition.getRow() + (direction), myPosition.getColumn() + 1);
         // Check double move while checking single move
-        System.out.println("Checking move in front.");
         if(checkMove(myPosition, myPosition.getRow() + (direction), myPosition.getColumn())){
-            System.out.println("Checking double move.");
             if (color == ChessGame.TeamColor.WHITE && myPosition.getRow() == 2) {
                 checkMove(myPosition, myPosition.getRow() + (direction * 2), myPosition.getColumn());
             }
@@ -55,13 +52,10 @@ public class NewPawnMovesList extends MovesList{
 
     private boolean checkMove(ChessPosition currentPosition, int row, int col){
         if (isWithinBounds(row, col)){
-            System.out.println(">> Position (" + row + ", " + col + ") is within bounds");
             ChessPosition checkPosition = new ChessPosition(row, col);
             if(board.getPiece(checkPosition) == null){
-                System.out.println(">> Position (" + row + ", " + col + ") is empty: " + board.getPiece(checkPosition));
                 if(!checkPromotion(currentPosition, row, col)) {
                     addMove(currentPosition, row, col);
-                    System.out.println(">> Position (" + row + ", " + col + ") has been added");
                     return true;
                 }
                 else {
@@ -80,31 +74,17 @@ public class NewPawnMovesList extends MovesList{
     // checkAttack checks whether there is a piece of the opposite team's color in the given coordinate and adds
     // that position to the move list if valid.
     private void checkAttack(ChessPosition currentPosition, int row, int col){
-        System.out.println(">> Attack commencing!");
         if (isWithinBounds(row, col)){
-            System.out.println(">> Position is within range.");
             ChessPosition checkPosition = new ChessPosition(row, col);
             if(board.getPiece(checkPosition) != null){
-                System.out.print("Piece found in (" + row + ", " + col + ") " );
                 if (board.getPiece(checkPosition).getTeamColor() != color){
                     if (!checkPromotion(currentPosition, row, col)){
                         addMove(currentPosition, row, col);
-                        System.out.println("has successfully been defeated.");
-                    }
-                    else {
-                        System.out.println("The pawn won the battle and got promoted!");
                     }
                 }
-                else {
-                    System.out.println(" was a friendly.");
-                }
-            }
-            else {
-                System.out.println(">> Position is empty. Attack aborted on: " + board.getPiece(checkPosition));
             }
         }
         else{
-            System.out.println(">> Position is out of bounds.");
         }
     }
 
@@ -113,11 +93,9 @@ public class NewPawnMovesList extends MovesList{
     private boolean checkPromotion(ChessPosition currentPosition, int row, int col){
         if (row == endRow){
             addPromotion(currentPosition, col);
-            System.out.println("[Promoted]");
             return true;
         }
         else {
-            System.out.println("[No promotion available]");
             return false;
         }
     }
@@ -134,7 +112,6 @@ public class NewPawnMovesList extends MovesList{
 
     // addMove simply adds a move to the move list.
     private void addMove(ChessPosition myPosition, int row, int col) {
-        System.out.println("Move (" + row + ", " + col + ") added to list.");
         pieceMoves.add(new ChessMove(myPosition, new ChessPosition(row, col), null));
     }
 
