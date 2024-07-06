@@ -79,7 +79,7 @@ public class ChessPiece {
                 moves = moveList.getPossibleMoves();
                 break;
             case PAWN:
-                moveList = new PawnMovesList(board, myPosition);
+                moveList = new NewPawnMovesList(board, myPosition);
                 moves = moveList.getPossibleMoves();
                 break;
             case ROOK:
