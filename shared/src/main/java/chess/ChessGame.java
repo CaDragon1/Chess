@@ -112,7 +112,87 @@ public class ChessGame {
      * @return false if the team is not in check, true if it is.
      */
     public boolean putsInCheck(ChessBoard gameBoard, TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingPosition = findKing(gameBoard, teamColor);
+        if (kingPosition != null) {
+
+        }
+        return false;
+    }
+
+    /**
+     * Checks all positions diagonal to a given ChessPosition to determine if the position is in danger to
+     * bishops or queens.
+     * @param gameBoard is the given board to check (either the actual game board or a copy to ensure that a given move
+     *                  is legal)
+     * @param kingPosition is the position we are checking the safety of
+     * @return true if the spot is in danger, false otherwise
+     */
+    public boolean checkAllDiagonals(ChessBoard gameBoard, ChessPosition kingPosition) {
+        boolean inDanger = false;
+        for (int i = -1; i <= 1; i+=2){
+            for (int j = -1; j <= 1; j+=2){
+                if(!inDanger){
+                    inDanger = checkDiagonal(i, j, kingPosition,
+                            gameBoard.getPiece(kingPosition).getTeamColor(), gameBoard);
+                }
+            }
+        }
+        return inDanger;
+    }
+
+    /**
+     * This method iterates over a given diagonal direction (-1 to go left or down, 1 to go right or up) and returns
+     * true if the position is reachable by an enemy queen or bishop.
+     * @param rowIncrement if -1, row decreases (down). If 1, row increases (up).
+     * @param colIncrement if -1, column decreases (left). If 1, column increases (right).
+     * @param kingPosition is the position that we are checking.
+     * @param teamColor is the color of the king that we use to determine who is friend or foe.
+     * @return true if the position is reachable by enemy queen or bishop, false otherwise
+     */
+    private boolean checkDiagonal(int rowIncrement, int colIncrement,
+                                  ChessPosition kingPosition, TeamColor teamColor, ChessBoard gameBoard) {
+        boolean keepChecking = true;
+        int incrementer = 1;
+        // Verify that the next position is within bounds.
+        keepChecking = isInBounds(kingPosition.getRow() + rowIncrement, kingPosition.getColumn() + colIncrement);
+
+        ChessPosition checkingPosition = new ChessPosition(kingPosition.getRow() + (incrementer * rowIncrement),
+                kingPosition.getColumn() + (incrementer * colIncrement));
+        while (keepChecking) {
+            if (board.getPiece(checkingPosition) == null) {
+                incrementer++;
+                checkingPosition.setColValue(kingPosition.getColumn() + (incrementer * colIncrement));
+                checkingPosition.setRowValue(kingPosition.getRow() + (incrementer * rowIncrement));
+                keepChecking = isInBounds(checkingPosition.getRow(), checkingPosition.getColumn());
+            }
+            else if (board.getPiece(checkingPosition).getTeamColor() == teamColor) {
+                keepChecking = false;
+            }
+            else if (board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.BISHOP
+                    || board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.QUEEN) {
+                keepChecking = false;
+                return true;
+            }
+            else {
+                keepChecking = false;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Given a row and column integer, checks to make sure the coordinate is within the board.
+     * @param row = row value
+     * @param col = column value
+     * @return false if out of bounds, true otherwise
+     */
+    private boolean isInBounds(int row, int col) {
+        if(row <= 0 || row >= 9 || col <= 0 || col >= 9 ){
+            return false;
+        }
+        else{
+            return true;
+        }
     }
 
     /**
