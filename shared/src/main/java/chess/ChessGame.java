@@ -4,6 +4,7 @@ import javax.swing.text.Position;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -56,8 +57,17 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        Collection<ChessMove> validMoves = board.getPiece(startPosition).pieceMoves(board, startPosition);
+        checkingBoard = board;
+        for (ChessMove move : validMoves) {
+            checkingBoard.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+            checkingBoard.addPiece(move.getStartPosition(), null);
+            if (putsInCheck(checkingBoard, checkingBoard.getPiece(move.getEndPosition()).getTeamColor())){
+                validMoves.remove(move);
+            }
+        }
 
-        return board.getPiece(startPosition).pieceMoves(board, startPosition);
+        return validMoves;
     }
 
     /**
@@ -72,7 +82,7 @@ public class ChessGame {
             checkingBoard.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
             checkingBoard.addPiece(move.getStartPosition(), null);
         }
-        if (!isInCheck(teamTurn)){
+        if (!putsInCheck(checkingBoard, teamTurn)){
             board = checkingBoard;
             switch(teamTurn){
                 case WHITE:
