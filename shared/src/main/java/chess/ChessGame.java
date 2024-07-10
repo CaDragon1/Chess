@@ -2,6 +2,8 @@ package chess;
 
 import javax.swing.text.Position;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -68,7 +70,22 @@ public class ChessGame {
         checkingBoard = board;
         if (validMoves(move.getStartPosition()).contains(move)){
             checkingBoard.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+            checkingBoard.addPiece(move.getStartPosition(), null);
+        }
+        if (!isInCheck(teamTurn)){
+            board = checkingBoard;
+            switch(teamTurn){
+                case WHITE:
+                    teamTurn = TeamColor.BLACK;
+                    break;
+                case BLACK:
+                    teamTurn = TeamColor.WHITE;
+                    break;
+            }
+        }
+        else {
 
+            checkingBoard = board;
         }
     }
 
@@ -79,7 +96,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return putsInCheck(board, teamColor);
     }
 
     /**
@@ -89,7 +106,45 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        HashSet<ChessMove> allMoves = getAllMoves(board, teamColor);
+
+        for (ChessMove move : allMoves) {
+            checkingBoard.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+            checkingBoard.addPiece(move.getStartPosition(), null);
+            if (!putsInCheck(checkingBoard, teamColor)){
+                checkingBoard = board;
+                return false;
+            }
+            checkingBoard = board;
+        }
+        return true;
+    }
+
+    /**
+     * In order to determine checkmate, we need to be certain that no moves the given team makes can result in the
+     * king leaving check. Therefore, we need a list of every move a team can make.
+     *
+     * @param gameBoard the board we are checking all moves for
+     * @param teamColor the team who we are getting all possible moves of
+     * @return a hashset containing every move possible
+     */
+    public HashSet<ChessMove> getAllMoves(ChessBoard gameBoard, TeamColor teamColor) {
+        HashSet<ChessMove> allMoves = new HashSet<>();
+        ChessPosition checkingPosition = new ChessPosition();
+
+        for (int column = 1; column <= 8; column++) {
+            for (int row = 1; row <= 8; row++) {
+
+                checkingPosition.setColValue(column);
+                checkingPosition.setRowValue(row);
+                // The position has to have a piece of the team color in order to add the moves of.
+                if (gameBoard.getPiece(checkingPosition) != null
+                        && gameBoard.getPiece(checkingPosition).getTeamColor() == teamColor) {
+                    allMoves.addAll(board.getPiece(checkingPosition).pieceMoves(gameBoard, checkingPosition));
+                }
+            }
+        }
+        return allMoves;
     }
 
     /**
@@ -113,10 +168,17 @@ public class ChessGame {
      */
     public boolean putsInCheck(ChessBoard gameBoard, TeamColor teamColor) {
         ChessPosition kingPosition = findKing(gameBoard, teamColor);
+        boolean inDanger;
         if (kingPosition != null) {
-
+            inDanger = checkAllDiagonals(gameBoard, kingPosition);
+            if (!inDanger) {
+                inDanger = checkAllStraights(gameBoard, kingPosition);
+            }
         }
-        return false;
+        else {
+            inDanger = false;
+        }
+        return inDanger;
     }
 
     /**
@@ -134,6 +196,19 @@ public class ChessGame {
                 if(!inDanger){
                     inDanger = checkDiagonal(i, j, kingPosition,
                             gameBoard.getPiece(kingPosition).getTeamColor(), gameBoard);
+                }
+            }
+        }
+        return inDanger;
+    }
+
+    public boolean checkAllStraights(ChessBoard gameBoard, ChessPosition kingPosition) {
+        boolean inDanger = false;
+        for (int i = -1; i <= 1; i+=2){
+            if(!inDanger){
+                inDanger = checkRow(i, kingPosition, gameBoard.getPiece(kingPosition).getTeamColor(), gameBoard);
+                if(!inDanger){
+                    inDanger = checkCol(i, kingPosition, gameBoard.getPiece(kingPosition).getTeamColor(), gameBoard);
                 }
             }
         }
@@ -181,6 +256,81 @@ public class ChessGame {
     }
 
     /**
+     * checkRow checks the vertical straights originating at the king's position.
+     * @param rowIncrement -1 if down, 1 if up
+     * @param kingPosition Self-explanatory. Determining if the king is in danger
+     * @param teamColor The current team's color
+     * @param gameBoard The game board
+     * @return true if the king is in danger, false if not
+     */
+    private boolean checkRow(int rowIncrement, ChessPosition kingPosition, TeamColor teamColor, ChessBoard gameBoard) {
+        boolean keepChecking = true;
+        int incrementer = 1;
+        keepChecking = isInBounds(kingPosition.getRow() + rowIncrement, kingPosition.getColumn());
+
+        ChessPosition checkingPosition = new ChessPosition(kingPosition.getRow() + (incrementer * rowIncrement),
+                kingPosition.getColumn());
+        while (keepChecking) {
+            if (board.getPiece(checkingPosition) == null) {
+                incrementer++;
+                checkingPosition.setRowValue(kingPosition.getRow() + (incrementer * rowIncrement));
+                keepChecking = isInBounds(checkingPosition.getRow(), checkingPosition.getColumn());
+            }
+            else {
+                keepChecking = false;
+                return rookThreaten(checkingPosition, gameBoard, teamColor);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * checkRow checks the vertical straights originating at the king's position.
+     * @param colIncrement -1 if left, 1 if right
+     * @param kingPosition Self-explanatory. Determining if the king is in danger
+     * @param teamColor The current team's color
+     * @param gameBoard The game board
+     * @return true if the king is in danger, false if not
+     */
+    private boolean checkCol(int colIncrement, ChessPosition kingPosition, TeamColor teamColor, ChessBoard gameBoard) {
+        boolean keepChecking = true;
+        int incrementer = 1;
+        keepChecking = isInBounds(kingPosition.getRow(), kingPosition.getColumn() + colIncrement);
+
+        ChessPosition checkingPosition = new ChessPosition(kingPosition.getRow(),
+                kingPosition.getColumn() + (incrementer * colIncrement));
+        while (keepChecking) {
+            if (board.getPiece(checkingPosition) == null) {
+                incrementer++;
+                checkingPosition.setColValue(kingPosition.getColumn() + (incrementer * colIncrement));
+                keepChecking = isInBounds(checkingPosition.getRow(), checkingPosition.getColumn());
+            }
+            else {
+                keepChecking = false;
+                return rookThreaten(checkingPosition, gameBoard, teamColor);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks to see if an enemy rook (or a queen) can reach the given position
+     * @param checkingPosition
+     * @param gameBoard
+     * @param teamColor
+     * @return true if reachable by enemy rook or queen, otherwise false
+     */
+    private boolean rookThreaten(ChessPosition checkingPosition, ChessBoard gameBoard, TeamColor teamColor) {
+        if (board.getPiece(checkingPosition).getTeamColor() == teamColor) {
+            return false;
+        }
+        else return board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.ROOK
+                || board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.QUEEN;
+
+    }
+
+
+    /**
      * Given a row and column integer, checks to make sure the coordinate is within the board.
      * @param row = row value
      * @param col = column value
@@ -225,7 +375,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.board = board;
     }
 
     /**
@@ -234,6 +384,18 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return board;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChessGame chessGame)) return false;
+        return teamTurn == chessGame.teamTurn && Objects.equals(board, chessGame.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(teamTurn, board);
     }
 }

@@ -58,17 +58,9 @@ public class NewPawnMovesList extends MovesList{
                     addMove(currentPosition, row, col);
                     return true;
                 }
-                else {
-                    return false;
-                }
-            }
-            else {
-                return false;
             }
         }
-        else {
-            return false;
-        }
+        return false;
     }
 
     // checkAttack checks whether there is a piece of the opposite team's color in the given coordinate and adds
