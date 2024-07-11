@@ -1,10 +1,7 @@
 package chess;
 
 import javax.swing.text.Position;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -57,14 +54,44 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        Collection<ChessMove> validMoves = board.getPiece(startPosition).pieceMoves(board, startPosition);
+
+
+
+        Collection<ChessMove> validMoves
+                = new HashSet<ChessMove>(board.getPiece(startPosition).pieceMoves(board, startPosition));
+        board.printBoard();
         checkingBoard = board;
+
         for (ChessMove move : validMoves) {
-            checkingBoard.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+            System.out.println(move.toString());
+        }
+
+        Iterator<ChessMove> iterator = validMoves.iterator();
+
+        while (iterator.hasNext()) {
+            ChessMove move = iterator.next();
+            System.out.println("\n Checking move " + move + ":");
+            checkingBoard.addPiece(move.getEndPosition(), checkingBoard.getPiece(move.getStartPosition()));
+            System.out.print(" Start position piece changed from " + checkingBoard.getPiece(move.getStartPosition()));
             checkingBoard.addPiece(move.getStartPosition(), null);
-            if (putsInCheck(checkingBoard, checkingBoard.getPiece(move.getEndPosition()).getTeamColor())){
-                validMoves.remove(move);
+            System.out.println(" to " + checkingBoard.getPiece(move.getStartPosition()));
+            System.out.println(" Move " + checkingBoard.getPiece(move.getEndPosition()) + " at ("
+                    + move.getEndPosition().getColumn() + "," + move.getEndPosition().getRow() + ")");
+
+            if (checkingBoard.getPiece(move.getEndPosition()) != null
+                    && putsInCheck(checkingBoard, checkingBoard.getPiece(move.getEndPosition()).getTeamColor())){
+                iterator.remove();
+                System.out.println("Removed.\n");
             }
+
+            // Testing code
+            System.out.print(" End position piece changed from " + checkingBoard.getPiece(move.getEndPosition()));
+            checkingBoard.addPiece(move.getStartPosition(), checkingBoard.getPiece(move.getEndPosition()));
+            checkingBoard.addPiece(move.getEndPosition(), null);
+            System.out.println(" to " + checkingBoard.getPiece(move.getEndPosition()));
+
+            ///checkingBoard = new ChessBoard();
+            //checkingBoard = board;
         }
 
         return validMoves;
@@ -333,7 +360,7 @@ public class ChessGame {
                 keepChecking = isInBounds(checkingPosition.getRow(), checkingPosition.getColumn());
             }
             else {
-                System.out.println("    'The row is unsafe from a rook or queen at (" + checkingPosition.getColumn() + ", " + checkingPosition.getRow() + ")'!!!");
+                System.out.println("    'A piece has been found at (" + checkingPosition.getColumn() + ", " + checkingPosition.getRow() + ")'!!!");
                 keepChecking = false;
                 return rookThreaten(checkingPosition, gameBoard, teamColor);
             }
@@ -354,9 +381,16 @@ public class ChessGame {
             return false;
         }
         else {
-            System.out.println("    'Lo, the king is under attack from a rook or queen at (" + checkingPosition.getColumn() + ", " + checkingPosition.getRow() + ")'!!!");
-            return board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.ROOK
-                    || board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.QUEEN;
+            System.out.println("    'Enemy piece spotted at (" + checkingPosition.getColumn() + ", " + checkingPosition.getRow() + ")'!!!");
+            if (board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.ROOK
+                    || board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.QUEEN) {
+                System.out.println("    'Lo, the king is under attack by a rook or queen!'");
+                return true;
+            }
+            else {
+                System.out.println("    'Ha, the fools brought a troop that cannot attack you, my lord!'");
+                return false;
+            }
 
         }
 
