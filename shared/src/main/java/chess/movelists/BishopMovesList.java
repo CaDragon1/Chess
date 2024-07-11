@@ -19,14 +19,9 @@ public class BishopMovesList extends MovesList {
 
     @Override
     void calculateMove(ChessPosition myPosition) {
-        System.out.println("Calculating moves:");
-        System.out.println("UP LEFT DIAGONAL\n");
         checkDiagonal(1, -1, myPosition);
-        System.out.println("UP RIGHT DIAGONAL\n");
         checkDiagonal(1, 1, myPosition);
-        System.out.println("DOWN LEFT DIAGONAL\n");
         checkDiagonal(-1, -1, myPosition);
-        System.out.println("DOWN RIGHT DIAGONAL\n");
         checkDiagonal(-1, 1, myPosition);
         printList();
     }
@@ -74,12 +69,10 @@ public class BishopMovesList extends MovesList {
     // Logic to add a move to the list
     void addMove(int row, int column, ChessPosition myPosition){
         ChessPosition checkingPosition = new ChessPosition(row, column);
-        System.out.println("Adding move");
         pieceMoves.add(new ChessMove(myPosition, checkingPosition, null));
     }
 
     public void printList(){
-        System.out.println("Printing list of bishop moves:");
         for(ChessMove element : pieceMoves){
             System.out.println("start (" + element.getStartPosition() + "), end (" + element.getEndPosition() + ")");
         }
