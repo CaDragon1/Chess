@@ -68,16 +68,20 @@ public class ChessGame {
 
         Iterator<ChessMove> iterator = validMoves.iterator();
 
+        /// Step 0: Cycle through the set using an iterator
         while (iterator.hasNext()) {
             ChessMove move = iterator.next();
-            System.out.println("\n Checking move " + move + ":");
+
+            // Step 1: Make the possible move on the checking board.
+            System.out.println("\n ---- Checking move " + move + ": ----");
             checkingBoard.addPiece(move.getEndPosition(), checkingBoard.getPiece(move.getStartPosition()));
             System.out.print(" Start position piece changed from " + checkingBoard.getPiece(move.getStartPosition()));
             checkingBoard.addPiece(move.getStartPosition(), null);
             System.out.println(" to " + checkingBoard.getPiece(move.getStartPosition()));
             System.out.println(" Move " + checkingBoard.getPiece(move.getEndPosition()) + " at ("
-                    + move.getEndPosition().getColumn() + "," + move.getEndPosition().getRow() + ")");
+                    + move.getEndPosition().getColumn() + "," + move.getEndPosition().getRow() + ")\n");
 
+            // Step 2: Does the move put the king into check? If so, remove the move from the set.
             if (checkingBoard.getPiece(move.getEndPosition()) != null
                     && putsInCheck(checkingBoard, checkingBoard.getPiece(move.getEndPosition()).getTeamColor())){
                 iterator.remove();
@@ -94,6 +98,7 @@ public class ChessGame {
             //checkingBoard = board;
         }
 
+        // Step 3: Return the final list of valid moves that DON'T put the king in check.
         return validMoves;
     }
 
@@ -133,6 +138,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
+        System.out.println("CHECKING MAIN BOARD FOR " + teamColor + " isInCheck");
         return putsInCheck(board, teamColor);
     }
 
@@ -206,16 +212,43 @@ public class ChessGame {
     public boolean putsInCheck(ChessBoard gameBoard, TeamColor teamColor) {
         ChessPosition kingPosition = findKing(gameBoard, teamColor);
         boolean inDanger;
-        System.out.println("'I shall scout for danger, my king!'");
+        System.out.println("----------------------------------\n"
+                + teamColor + " king is at (row, col): (" + kingPosition.getRow() + ", " + kingPosition.getColumn() + ")");
+
+        // Step 0: Ensure the king's position exists.
         if (kingPosition != null) {
+
+            // Step 1: Check the diagonals to see if the king's position is in danger.
             inDanger = checkAllDiagonals(gameBoard, kingPosition);
+            System.out.println("    - Diagonal check result: " + inDanger);
+
+            // If the king is in danger, we don't need to check the straights. If it isn't, we check the straights.
             if (!inDanger) {
                 inDanger = checkAllStraights(gameBoard, kingPosition);
+                System.out.println("    - Straight check result: " + inDanger);
+            }
+            // And so on for knights, pawns, and kings.
+            if (!inDanger) {
+                inDanger = checkKnights(gameBoard, kingPosition);
+                System.out.println("    - Knight check result: " + inDanger);
+            }
+
+            if (!inDanger) {
+                inDanger = checkPawn(gameBoard, kingPosition);
+                System.out.println("    - Pawn check result: " + inDanger);
+            }
+
+            if (!inDanger) {
+                inDanger = checkKing(gameBoard, kingPosition);
+                System.out.println("    - Enemy king check result: " + inDanger);
             }
         }
         else {
+            System.out.println("    - King check result: null");
             inDanger = false;
         }
+        // Step 2: Return inDanger.
+        System.out.println("    RETURNING " + inDanger);
         return inDanger;
     }
 
@@ -228,37 +261,144 @@ public class ChessGame {
      * @return true if the spot is in danger, false otherwise
      */
     public boolean checkAllDiagonals(ChessBoard gameBoard, ChessPosition kingPosition) {
-        System.out.println("'COMMENCING DIAGONAL CHECKING PATTERN, MY LIEGE.'");
         boolean inDanger = false;
+
+        // Step 1: Create a nested for loop to check the diagonals in all directions.
         for (int i = -1; i <= 1; i+=2){
             for (int j = -1; j <= 1; j+=2){
+
+                // Step 2: If the king is not in danger, check the given diagonal direction.
                 if(!inDanger){
-                    System.out.print(">> checking diagonal (" + i + ", " + j + "): ");
+                    System.out.print("        >> checking diagonal (" + i + ", " + j + "): ");
                     inDanger = checkDiagonal(i, j, kingPosition,
                             gameBoard.getPiece(kingPosition).getTeamColor(), gameBoard);
-                    System.out.println("inDanger = " + inDanger);
+                    System.out.println("            inDanger = " + inDanger);
+                }
+            }
+        }
+        // Step 3: Return inDanger.
+        return inDanger;
+    }
+
+    public boolean checkAllStraights(ChessBoard gameBoard, ChessPosition kingPosition) {
+        boolean inDanger = false;
+        for (int i = -1; i <= 1; i+=2){
+            if(!inDanger){
+                System.out.print("        >> checking vertical line in direction " + i + ": ");
+                inDanger = checkRow(i, kingPosition, gameBoard.getPiece(kingPosition).getTeamColor(), gameBoard);
+                System.out.println("            in danger = " + inDanger);
+                if(!inDanger){
+                    System.out.print("        >> checking horizontal line in direction " + i + ": ");
+                    inDanger = checkCol(i, kingPosition, gameBoard.getPiece(kingPosition).getTeamColor(), gameBoard);
+                    System.out.println("            inDanger = " + inDanger);
                 }
             }
         }
         return inDanger;
     }
 
-    public boolean checkAllStraights(ChessBoard gameBoard, ChessPosition kingPosition) {
-        System.out.println("'COMMENCING STRAIGHT CHECKING PATTERN, MY LIEGE.'");
+    /**
+     * Checks every surrounding knight position to see if there is an enemy knight there.
+     * @param gameBoard
+     * @param kingPosition
+     * @return
+     */
+    public boolean checkKnights(ChessBoard gameBoard, ChessPosition kingPosition) {
         boolean inDanger = false;
-        for (int i = -1; i <= 1; i+=2){
-            if(!inDanger){
-                System.out.print(">> checking vertical line in direction " + i + ": ");
-                inDanger = checkRow(i, kingPosition, gameBoard.getPiece(kingPosition).getTeamColor(), gameBoard);
-                System.out.println("in danger = " + inDanger);
-                if(!inDanger){
-                    System.out.print(">> checking horizontal line in direction " + i + ": ");
-                    inDanger = checkCol(i, kingPosition, gameBoard.getPiece(kingPosition).getTeamColor(), gameBoard);
-                    System.out.println("inDanger = " + inDanger);
+        ChessPosition checkingPosition = new ChessPosition();
+
+        for (int row = kingPosition.getRow() - 2; row <= kingPosition.getRow() + 2; row++){
+            for (int column = kingPosition.getColumn() - 2; column <= kingPosition.getColumn() + 2; column++){
+
+                if (Math.abs(row - kingPosition.getRow()) + Math.abs(column - kingPosition.getColumn()) == 3) {
+
+                    if (!inDanger) {
+                        checkingPosition.setColValue(column);
+                        checkingPosition.setRowValue(row);
+
+                        if (isInBounds(row, column) && gameBoard.getPiece(checkingPosition) != null
+                                && gameBoard.getPiece(checkingPosition).getTeamColor()
+                                != gameBoard.getPiece(kingPosition).getTeamColor()) {
+
+                            if (gameBoard.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.KNIGHT) {
+                                inDanger = true;
+                            }
+                        }
+                    }
                 }
             }
         }
         return inDanger;
+    }
+
+    /**
+     * Checks to see if there is an enemy king surrounding our king.
+     * @param gameBoard
+     * @param kingPosition
+     * @return
+     */
+    public boolean checkKing(ChessBoard gameBoard, ChessPosition kingPosition) {
+        boolean inDanger = false;
+        ChessPosition checkingPosition = new ChessPosition();
+
+        for (int row = kingPosition.getRow() - 1; row <= kingPosition.getRow() + 1; row++){
+            for (int column = kingPosition.getColumn() - 1; column <= kingPosition.getColumn() + 1; column++){
+
+                checkingPosition.setColValue(column);
+                checkingPosition.setRowValue(row);
+
+                if (gameBoard.getPiece(checkingPosition) != null
+                        && gameBoard.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.KING) {
+
+                    if (gameBoard.getPiece(checkingPosition).getTeamColor()
+                            != gameBoard.getPiece(kingPosition).getTeamColor()) {
+
+                        inDanger = true;
+                    }
+                }
+            }
+        }
+        return inDanger;
+    }
+
+    /**
+     * Checks if the king is in danger from a pawn.
+     * @param gameBoard
+     * @param kingPosition
+     * @return
+     */
+    private boolean checkPawn(ChessBoard gameBoard, ChessPosition kingPosition) {
+        boolean inDanger = false;
+        ChessPosition checkingPosition = new ChessPosition();
+        TeamColor color = gameBoard.getPiece(kingPosition).getTeamColor();
+
+        int attackDirection = getDirection(gameBoard, kingPosition);
+        checkingPosition.setRowValue(kingPosition.getRow() + attackDirection);
+
+        for (int col = kingPosition.getColumn() - 1; col <= kingPosition.getColumn() + 1; col+=2){
+
+            if (gameBoard.getPiece(checkingPosition) != null
+                    && gameBoard.getPiece(checkingPosition).getTeamColor() != color
+                    && gameBoard.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.PAWN) {
+                inDanger = true;
+            }
+        }
+        return inDanger;
+    }
+
+    /**
+     * Determines what position enemy pawns will attack the king in.
+     * @param gameBoard
+     * @param kingPosition
+     * @return -1 if enemy team color is black, 1 if enemy team color is white.
+     */
+    private int getDirection(ChessBoard gameBoard, ChessPosition kingPosition) {
+        if (gameBoard.getPiece(kingPosition).getTeamColor() == TeamColor.WHITE){
+            return 1;
+        }
+        else {
+            return -1;
+        }
     }
 
     /**
@@ -272,31 +412,43 @@ public class ChessGame {
      */
     private boolean checkDiagonal(int rowIncrement, int colIncrement,
                                   ChessPosition kingPosition, TeamColor teamColor, ChessBoard gameBoard) {
+        // This method has too many arguments.
         boolean keepChecking = true;
         int incrementer = 1;
-        // Verify that the next position is within bounds.
-        keepChecking = isInBounds(kingPosition.getRow() + rowIncrement, kingPosition.getColumn() + colIncrement);
 
+        // Step 1: Verify that the next position is within bounds.
+        keepChecking = isInBounds(kingPosition.getRow() + rowIncrement, kingPosition.getColumn() + colIncrement);
+        // Step 2: Create a new checking position and set it to the first space we will check.
         ChessPosition checkingPosition = new ChessPosition(kingPosition.getRow() + (incrementer * rowIncrement),
                 kingPosition.getColumn() + (incrementer * colIncrement));
+
+        // Step 3: Until told to stop checking, loop through every position on the given diagonal.
         while (keepChecking) {
+
+            // Step 3.1: If the position is empty, increase the incrementer and update the checking position.
             if (board.getPiece(checkingPosition) == null) {
-                System.out.println("    'Verily, there be'eth no piece in this diagonal at "
-                        + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")'.");
+                System.out.println("            no piece in this diagonal at "
+                        + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")");
                 incrementer++;
                 checkingPosition.setColValue(kingPosition.getColumn() + (incrementer * colIncrement));
                 checkingPosition.setRowValue(kingPosition.getRow() + (incrementer * rowIncrement));
                 keepChecking = isInBounds(checkingPosition.getRow(), checkingPosition.getColumn());
             }
+
+            // Step 3.2: If the position contains a piece of the same color, stop checking.
             else if (board.getPiece(checkingPosition).getTeamColor() == teamColor) {
                 keepChecking = false;
-                System.out.println("    'Hark! A friend doth stand at " + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")'.");
+                System.out.println("            friend at " + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")");
             }
+
+            // Step 3.3: If the position contains a bishop and queen (that are not of our color), stop checking and return "true".
             else if (board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.BISHOP
                     || board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.QUEEN) {
                 keepChecking = false;
                 return true;
             }
+
+            // Step 3.4: If it's a different enemy piece, stop checking (they cannot reach the king).
             else {
                 keepChecking = false;
             }
@@ -321,14 +473,14 @@ public class ChessGame {
                 kingPosition.getColumn());
         while (keepChecking) {
             if (board.getPiece(checkingPosition) == null) {
-                System.out.println("    'Verily, there be'eth no piece in this row at "
-                        + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")'.");
+                System.out.println("            no piece in this row at "
+                        + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")");
                 incrementer++;
                 checkingPosition.setRowValue(kingPosition.getRow() + (incrementer * rowIncrement));
                 keepChecking = isInBounds(checkingPosition.getRow(), checkingPosition.getColumn());
             }
             else {
-                System.out.println("    'The column is unsafe from a rook or queen at (" + checkingPosition.getColumn() + ", " + checkingPosition.getRow() + ")'!!!");
+                System.out.println("            piece at (" + checkingPosition.getColumn() + ", " + checkingPosition.getRow() + ")");
                 keepChecking = false;
                 return rookThreaten(checkingPosition, gameBoard, teamColor);
             }
@@ -344,7 +496,7 @@ public class ChessGame {
      * @param gameBoard The game board
      * @return true if the king is in danger, false if not
      */
-    private boolean checkCol(int colIncrement, ChessPosition kingPosition, TeamColor teamColor, ChessBoard gameBoard) {
+    private boolean  checkCol(int colIncrement, ChessPosition kingPosition, TeamColor teamColor, ChessBoard gameBoard) {
         boolean keepChecking = true;
         int incrementer = 1;
         keepChecking = isInBounds(kingPosition.getRow(), kingPosition.getColumn() + colIncrement);
@@ -353,14 +505,14 @@ public class ChessGame {
                 kingPosition.getColumn() + (incrementer * colIncrement));
         while (keepChecking) {
             if (board.getPiece(checkingPosition) == null) {
-                System.out.println("    'Verily, there be'eth no piece in this column at "
-                        + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")'.");
+                System.out.println("            no piece in this column at "
+                        + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")");
                 incrementer++;
                 checkingPosition.setColValue(kingPosition.getColumn() + (incrementer * colIncrement));
                 keepChecking = isInBounds(checkingPosition.getRow(), checkingPosition.getColumn());
             }
             else {
-                System.out.println("    'A piece has been found at (" + checkingPosition.getColumn() + ", " + checkingPosition.getRow() + ")'!!!");
+                System.out.println("            piece at (" + checkingPosition.getColumn() + ", " + checkingPosition.getRow() + ")");
                 keepChecking = false;
                 return rookThreaten(checkingPosition, gameBoard, teamColor);
             }
@@ -377,18 +529,18 @@ public class ChessGame {
      */
     private boolean rookThreaten(ChessPosition checkingPosition, ChessBoard gameBoard, TeamColor teamColor) {
         if (board.getPiece(checkingPosition).getTeamColor() == teamColor) {
-            System.out.println("    'Hark! A friend doth stand at " + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")'.");
+            System.out.println("                friend at " + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")");
             return false;
         }
         else {
-            System.out.println("    'Enemy piece spotted at (" + checkingPosition.getColumn() + ", " + checkingPosition.getRow() + ")'!!!");
+            System.out.println("                Enemy piece at (" + checkingPosition.getColumn() + ", " + checkingPosition.getRow() + ")");
             if (board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.ROOK
                     || board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.QUEEN) {
-                System.out.println("    'Lo, the king is under attack by a rook or queen!'");
+                System.out.println("                Piece is rook or queen'");
                 return true;
             }
             else {
-                System.out.println("    'Ha, the fools brought a troop that cannot attack you, my lord!'");
+                System.out.println("                Piece is not threatening'");
                 return false;
             }
 
