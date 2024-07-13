@@ -1,6 +1,5 @@
 package chess;
 
-import javax.swing.text.Position;
 import java.util.*;
 
 /**
@@ -12,12 +11,11 @@ import java.util.*;
 public class ChessGame {
     private TeamColor teamTurn;
     private ChessBoard board;
-    private ChessBoard checkingBoard;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
         board = new ChessBoard();
-        checkingBoard = new ChessBoard();
+        board.resetBoard();
     }
 
     /**
@@ -57,49 +55,57 @@ public class ChessGame {
 
 
 
-        Collection<ChessMove> validMoves
+        Collection<ChessMove> allMoves
                 = new HashSet<ChessMove>(board.getPiece(startPosition).pieceMoves(board, startPosition));
+        Set<ChessMove> validMoves = new HashSet<ChessMove>();
+        validMoves.addAll(allMoves);
         board.printBoard();
-        checkingBoard = board;
 
         for (ChessMove move : validMoves) {
             System.out.println(move.toString());
         }
 
-        Iterator<ChessMove> iterator = validMoves.iterator();
 
         /// Step 0: Cycle through the set using an iterator
-        while (iterator.hasNext()) {
-            ChessMove move = iterator.next();
+        for (ChessMove move : allMoves) {
 
             // Step 1: Make the possible move on the checking board.
             System.out.println("\n ---- Checking move " + move + ": ----");
-            checkingBoard.addPiece(move.getEndPosition(), checkingBoard.getPiece(move.getStartPosition()));
-            System.out.print(" Start position piece changed from " + checkingBoard.getPiece(move.getStartPosition()));
-            checkingBoard.addPiece(move.getStartPosition(), null);
-            System.out.println(" to " + checkingBoard.getPiece(move.getStartPosition()));
-            System.out.println(" Move " + checkingBoard.getPiece(move.getEndPosition()) + " at ("
-                    + move.getEndPosition().getColumn() + "," + move.getEndPosition().getRow() + ")\n");
+            System.out.println("    >> Starting position: (" + startPosition.getRow() + ", " + startPosition.getColumn() + ")");
+            System.out.println("    >> Ending position: (" + move.getEndPosition().getRow() + ", " + move.getEndPosition().getColumn() + ")");
+            addMove(move);
 
             // Step 2: Does the move put the king into check? If so, remove the move from the set.
-            if (checkingBoard.getPiece(move.getEndPosition()) != null
-                    && putsInCheck(checkingBoard, checkingBoard.getPiece(move.getEndPosition()).getTeamColor())){
-                iterator.remove();
+            if (isInCheck(board.getPiece(move.getEndPosition()).getTeamColor())){
+                validMoves.remove(move);
                 System.out.println("Removed.\n");
             }
 
-            // Testing code
-            System.out.print(" End position piece changed from " + checkingBoard.getPiece(move.getEndPosition()));
-            checkingBoard.addPiece(move.getStartPosition(), checkingBoard.getPiece(move.getEndPosition()));
-            checkingBoard.addPiece(move.getEndPosition(), null);
-            System.out.println(" to " + checkingBoard.getPiece(move.getEndPosition()));
-
-            ///checkingBoard = new ChessBoard();
-            //checkingBoard = board;
+            revertMove(move);
         }
 
         // Step 3: Return the final list of valid moves that DON'T put the king in check.
         return validMoves;
+    }
+
+    /**
+     * Sets the board to a given movestate without changing the team color.
+     * @param move is the move we want to make.
+     */
+    public void addMove(ChessMove move) {
+        board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+        board.addPiece(move.getStartPosition(), null);
+        System.out.println("move has been made");
+    }
+
+    /**
+     * Returns the board to its state before a move was made.
+     * @param move is the move we want to undo.
+     */
+    public void revertMove(ChessMove move) {
+        board.addPiece(move.getStartPosition(), board.getPiece(move.getEndPosition()));
+        board.addPiece(move.getEndPosition(), null);
+        System.out.println("move has been reverted");
     }
 
     /**
@@ -109,13 +115,9 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        checkingBoard = board;
+        //checkingBoard = board;
         if (validMoves(move.getStartPosition()).contains(move)){
-            checkingBoard.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
-            checkingBoard.addPiece(move.getStartPosition(), null);
-        }
-        if (!putsInCheck(checkingBoard, teamTurn)){
-            board = checkingBoard;
+            addMove(move);
             switch(teamTurn){
                 case WHITE:
                     teamTurn = TeamColor.BLACK;
@@ -126,9 +128,9 @@ public class ChessGame {
             }
         }
         else {
-
-            checkingBoard = board;
+            throw new InvalidMoveException();
         }
+
     }
 
     /**
@@ -137,9 +139,34 @@ public class ChessGame {
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
-    public boolean isInCheck(TeamColor teamColor) {
+    /*public boolean isInCheck(TeamColor teamColor) {
         System.out.println("CHECKING MAIN BOARD FOR " + teamColor + " isInCheck");
         return putsInCheck(board, teamColor);
+    }*/
+
+    public boolean isInCheck(TeamColor teamColor) {
+
+        Set<ChessMove> allEnemyMoves = new HashSet<ChessMove>();
+        ChessPosition checkingPosition;
+        for (int i = 1; i <9; i++){
+            for (int j = 1; j < 9; j++){
+                checkingPosition = new ChessPosition(i, j);
+                if (board.getPiece(checkingPosition) != null && board.getPiece(checkingPosition).getTeamColor() != teamColor) {
+                    System.out.println("____moves added for " + board.getPiece(checkingPosition).getPieceType() + " at ("
+                            + i + ", " + j + ")____");
+                    allEnemyMoves.addAll(board.getPiece(checkingPosition).pieceMoves(board, checkingPosition));
+                }
+            }
+        }
+        for (ChessMove move : allEnemyMoves) {
+            if (move.getEndPosition().equals(findKing(board, teamColor))){
+                System.out.println(teamColor + " king under attack by " + board.getPiece(move.getStartPosition()).getPieceType()
+                        + " at (" + move.getEndPosition().getRow() + ", " + move.getEndPosition().getColumn() + ")");
+                return true;
+            }
+        }
+        System.out.println("No enemies in range of " + teamColor + "king.");
+        return false;
     }
 
     /**
@@ -149,16 +176,14 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        HashSet<ChessMove> allMoves = getAllMoves(board, teamColor);
+        HashSet<ChessMove> allMoves = getAllMoves(teamColor);
 
         for (ChessMove move : allMoves) {
-            checkingBoard.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
-            checkingBoard.addPiece(move.getStartPosition(), null);
-            if (!putsInCheck(checkingBoard, teamColor)){
-                checkingBoard = board;
+            addMove(move);
+            if (!isInCheck(teamColor)){
                 return false;
             }
-            checkingBoard = board;
+            revertMove(move);
         }
         return true;
     }
@@ -167,11 +192,10 @@ public class ChessGame {
      * In order to determine checkmate, we need to be certain that no moves the given team makes can result in the
      * king leaving check. Therefore, we need a list of every move a team can make.
      *
-     * @param gameBoard the board we are checking all moves for
      * @param teamColor the team who we are getting all possible moves of
      * @return a hashset containing every move possible
      */
-    public HashSet<ChessMove> getAllMoves(ChessBoard gameBoard, TeamColor teamColor) {
+    public HashSet<ChessMove> getAllMoves(TeamColor teamColor) {
         HashSet<ChessMove> allMoves = new HashSet<>();
         ChessPosition checkingPosition = new ChessPosition();
 
@@ -181,9 +205,11 @@ public class ChessGame {
                 checkingPosition.setColValue(column);
                 checkingPosition.setRowValue(row);
                 // The position has to have a piece of the team color in order to add the moves of.
-                if (gameBoard.getPiece(checkingPosition) != null
-                        && gameBoard.getPiece(checkingPosition).getTeamColor() == teamColor) {
-                    allMoves.addAll(board.getPiece(checkingPosition).pieceMoves(gameBoard, checkingPosition));
+                if (board.getPiece(checkingPosition) != null) {
+
+                    if (board.getPiece(checkingPosition).getTeamColor() == teamColor) {
+                        allMoves.addAll(board.getPiece(checkingPosition).pieceMoves(board, checkingPosition));
+                    }
                 }
             }
         }
@@ -198,354 +224,14 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
-    }
+        Set<ChessMove> allMoves = getAllMoves(teamColor);
+        if(!isInCheck(teamColor)){
+            for (ChessMove move : allMoves) {}
 
-    /**
-     * Given a board, determines if a team is in checkmate on that board.
-     * This is useful for checking if a move will put your king in check, and it can also be called by isInCheck.
-     * @param gameBoard is the board used to determine if said team is in check (a temporary board is given when
-     *                    determining if a move will put the king in check).
-     * @param teamColor is the team who we are determining check status for.
-     * @return false if the team is not in check, true if it is.
-     */
-    public boolean putsInCheck(ChessBoard gameBoard, TeamColor teamColor) {
-        ChessPosition kingPosition = findKing(gameBoard, teamColor);
-        boolean inDanger;
-        System.out.println("----------------------------------\n"
-                + teamColor + " king is at (row, col): (" + kingPosition.getRow() + ", " + kingPosition.getColumn() + ")");
 
-        // Step 0: Ensure the king's position exists.
-        if (kingPosition != null) {
-
-            // Step 1: Check the diagonals to see if the king's position is in danger.
-            inDanger = checkAllDiagonals(gameBoard, kingPosition);
-            System.out.println("    - Diagonal check result: " + inDanger);
-
-            // If the king is in danger, we don't need to check the straights. If it isn't, we check the straights.
-            if (!inDanger) {
-                inDanger = checkAllStraights(gameBoard, kingPosition);
-                System.out.println("    - Straight check result: " + inDanger);
-            }
-            // And so on for knights, pawns, and kings.
-            if (!inDanger) {
-                inDanger = checkKnights(gameBoard, kingPosition);
-                System.out.println("    - Knight check result: " + inDanger);
-            }
-
-            if (!inDanger) {
-                inDanger = checkPawn(gameBoard, kingPosition);
-                System.out.println("    - Pawn check result: " + inDanger);
-            }
-
-            if (!inDanger) {
-                inDanger = checkKing(gameBoard, kingPosition);
-                System.out.println("    - Enemy king check result: " + inDanger);
-            }
         }
-        else {
-            System.out.println("    - King check result: null");
-            inDanger = false;
-        }
-        // Step 2: Return inDanger.
-        System.out.println("    RETURNING " + inDanger);
-        return inDanger;
-    }
 
-    /**
-     * Checks all positions diagonal to a given ChessPosition to determine if the position is in danger to
-     * bishops or queens.
-     * @param gameBoard is the given board to check (either the actual game board or a copy to ensure that a given move
-     *                  is legal)
-     * @param kingPosition is the position we are checking the safety of
-     * @return true if the spot is in danger, false otherwise
-     */
-    public boolean checkAllDiagonals(ChessBoard gameBoard, ChessPosition kingPosition) {
-        boolean inDanger = false;
-
-        // Step 1: Create a nested for loop to check the diagonals in all directions.
-        for (int i = -1; i <= 1; i+=2){
-            for (int j = -1; j <= 1; j+=2){
-
-                // Step 2: If the king is not in danger, check the given diagonal direction.
-                if(!inDanger){
-                    System.out.print("        >> checking diagonal (" + i + ", " + j + "): ");
-                    inDanger = checkDiagonal(i, j, kingPosition,
-                            gameBoard.getPiece(kingPosition).getTeamColor(), gameBoard);
-                    System.out.println("            inDanger = " + inDanger);
-                }
-            }
-        }
-        // Step 3: Return inDanger.
-        return inDanger;
-    }
-
-    public boolean checkAllStraights(ChessBoard gameBoard, ChessPosition kingPosition) {
-        boolean inDanger = false;
-        for (int i = -1; i <= 1; i+=2){
-            if(!inDanger){
-                System.out.print("        >> checking vertical line in direction " + i + ": ");
-                inDanger = checkRow(i, kingPosition, gameBoard.getPiece(kingPosition).getTeamColor(), gameBoard);
-                System.out.println("            in danger = " + inDanger);
-                if(!inDanger){
-                    System.out.print("        >> checking horizontal line in direction " + i + ": ");
-                    inDanger = checkCol(i, kingPosition, gameBoard.getPiece(kingPosition).getTeamColor(), gameBoard);
-                    System.out.println("            inDanger = " + inDanger);
-                }
-            }
-        }
-        return inDanger;
-    }
-
-    /**
-     * Checks every surrounding knight position to see if there is an enemy knight there.
-     * @param gameBoard
-     * @param kingPosition
-     * @return
-     */
-    public boolean checkKnights(ChessBoard gameBoard, ChessPosition kingPosition) {
-        boolean inDanger = false;
-        ChessPosition checkingPosition = new ChessPosition();
-
-        for (int row = kingPosition.getRow() - 2; row <= kingPosition.getRow() + 2; row++){
-            for (int column = kingPosition.getColumn() - 2; column <= kingPosition.getColumn() + 2; column++){
-
-                if (Math.abs(row - kingPosition.getRow()) + Math.abs(column - kingPosition.getColumn()) == 3) {
-
-                    if (!inDanger) {
-                        checkingPosition.setColValue(column);
-                        checkingPosition.setRowValue(row);
-
-                        if (isInBounds(row, column) && gameBoard.getPiece(checkingPosition) != null
-                                && gameBoard.getPiece(checkingPosition).getTeamColor()
-                                != gameBoard.getPiece(kingPosition).getTeamColor()) {
-
-                            if (gameBoard.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.KNIGHT) {
-                                inDanger = true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return inDanger;
-    }
-
-    /**
-     * Checks to see if there is an enemy king surrounding our king.
-     * @param gameBoard
-     * @param kingPosition
-     * @return
-     */
-    public boolean checkKing(ChessBoard gameBoard, ChessPosition kingPosition) {
-        boolean inDanger = false;
-        ChessPosition checkingPosition = new ChessPosition();
-
-        for (int row = kingPosition.getRow() - 1; row <= kingPosition.getRow() + 1; row++){
-            for (int column = kingPosition.getColumn() - 1; column <= kingPosition.getColumn() + 1; column++){
-
-                checkingPosition.setColValue(column);
-                checkingPosition.setRowValue(row);
-
-                if (gameBoard.getPiece(checkingPosition) != null
-                        && gameBoard.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.KING) {
-
-                    if (gameBoard.getPiece(checkingPosition).getTeamColor()
-                            != gameBoard.getPiece(kingPosition).getTeamColor()) {
-
-                        inDanger = true;
-                    }
-                }
-            }
-        }
-        return inDanger;
-    }
-
-    /**
-     * Checks if the king is in danger from a pawn.
-     * @param gameBoard
-     * @param kingPosition
-     * @return
-     */
-    private boolean checkPawn(ChessBoard gameBoard, ChessPosition kingPosition) {
-        boolean inDanger = false;
-        ChessPosition checkingPosition = new ChessPosition();
-        TeamColor color = gameBoard.getPiece(kingPosition).getTeamColor();
-
-        int attackDirection = getDirection(gameBoard, kingPosition);
-        checkingPosition.setRowValue(kingPosition.getRow() + attackDirection);
-
-        for (int col = kingPosition.getColumn() - 1; col <= kingPosition.getColumn() + 1; col+=2){
-
-            if (gameBoard.getPiece(checkingPosition) != null
-                    && gameBoard.getPiece(checkingPosition).getTeamColor() != color
-                    && gameBoard.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.PAWN) {
-                inDanger = true;
-            }
-        }
-        return inDanger;
-    }
-
-    /**
-     * Determines what position enemy pawns will attack the king in.
-     * @param gameBoard
-     * @param kingPosition
-     * @return -1 if enemy team color is black, 1 if enemy team color is white.
-     */
-    private int getDirection(ChessBoard gameBoard, ChessPosition kingPosition) {
-        if (gameBoard.getPiece(kingPosition).getTeamColor() == TeamColor.WHITE){
-            return 1;
-        }
-        else {
-            return -1;
-        }
-    }
-
-    /**
-     * This method iterates over a given diagonal direction (-1 to go left or down, 1 to go right or up) and returns
-     * true if the position is reachable by an enemy queen or bishop.
-     * @param rowIncrement if -1, row decreases (down). If 1, row increases (up).
-     * @param colIncrement if -1, column decreases (left). If 1, column increases (right).
-     * @param kingPosition is the position that we are checking.
-     * @param teamColor is the color of the king that we use to determine who is friend or foe.
-     * @return true if the position is reachable by enemy queen or bishop, false otherwise
-     */
-    private boolean checkDiagonal(int rowIncrement, int colIncrement,
-                                  ChessPosition kingPosition, TeamColor teamColor, ChessBoard gameBoard) {
-        // This method has too many arguments.
-        boolean keepChecking = true;
-        int incrementer = 1;
-
-        // Step 1: Verify that the next position is within bounds.
-        keepChecking = isInBounds(kingPosition.getRow() + rowIncrement, kingPosition.getColumn() + colIncrement);
-        // Step 2: Create a new checking position and set it to the first space we will check.
-        ChessPosition checkingPosition = new ChessPosition(kingPosition.getRow() + (incrementer * rowIncrement),
-                kingPosition.getColumn() + (incrementer * colIncrement));
-
-        // Step 3: Until told to stop checking, loop through every position on the given diagonal.
-        while (keepChecking) {
-
-            // Step 3.1: If the position is empty, increase the incrementer and update the checking position.
-            if (board.getPiece(checkingPosition) == null) {
-                System.out.println("            no piece in this diagonal at "
-                        + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")");
-                incrementer++;
-                checkingPosition.setColValue(kingPosition.getColumn() + (incrementer * colIncrement));
-                checkingPosition.setRowValue(kingPosition.getRow() + (incrementer * rowIncrement));
-                keepChecking = isInBounds(checkingPosition.getRow(), checkingPosition.getColumn());
-            }
-
-            // Step 3.2: If the position contains a piece of the same color, stop checking.
-            else if (board.getPiece(checkingPosition).getTeamColor() == teamColor) {
-                keepChecking = false;
-                System.out.println("            friend at " + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")");
-            }
-
-            // Step 3.3: If the position contains a bishop and queen (that are not of our color), stop checking and return "true".
-            else if (board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.BISHOP
-                    || board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.QUEEN) {
-                keepChecking = false;
-                return true;
-            }
-
-            // Step 3.4: If it's a different enemy piece, stop checking (they cannot reach the king).
-            else {
-                keepChecking = false;
-            }
-        }
         return false;
-    }
-
-    /**
-     * checkRow checks the vertical straights originating at the king's position.
-     * @param rowIncrement -1 if down, 1 if up
-     * @param kingPosition Self-explanatory. Determining if the king is in danger
-     * @param teamColor The current team's color
-     * @param gameBoard The game board
-     * @return true if the king is in danger, false if not
-     */
-    private boolean checkRow(int rowIncrement, ChessPosition kingPosition, TeamColor teamColor, ChessBoard gameBoard) {
-        boolean keepChecking = true;
-        int incrementer = 1;
-        keepChecking = isInBounds(kingPosition.getRow() + rowIncrement, kingPosition.getColumn());
-
-        ChessPosition checkingPosition = new ChessPosition(kingPosition.getRow() + (incrementer * rowIncrement),
-                kingPosition.getColumn());
-        while (keepChecking) {
-            if (board.getPiece(checkingPosition) == null) {
-                System.out.println("            no piece in this row at "
-                        + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")");
-                incrementer++;
-                checkingPosition.setRowValue(kingPosition.getRow() + (incrementer * rowIncrement));
-                keepChecking = isInBounds(checkingPosition.getRow(), checkingPosition.getColumn());
-            }
-            else {
-                System.out.println("            piece at (" + checkingPosition.getColumn() + ", " + checkingPosition.getRow() + ")");
-                keepChecking = false;
-                return rookThreaten(checkingPosition, gameBoard, teamColor);
-            }
-        }
-        return false;
-    }
-
-    /**
-     * checkRow checks the vertical straights originating at the king's position.
-     * @param colIncrement -1 if left, 1 if right
-     * @param kingPosition Self-explanatory. Determining if the king is in danger
-     * @param teamColor The current team's color
-     * @param gameBoard The game board
-     * @return true if the king is in danger, false if not
-     */
-    private boolean  checkCol(int colIncrement, ChessPosition kingPosition, TeamColor teamColor, ChessBoard gameBoard) {
-        boolean keepChecking = true;
-        int incrementer = 1;
-        keepChecking = isInBounds(kingPosition.getRow(), kingPosition.getColumn() + colIncrement);
-
-        ChessPosition checkingPosition = new ChessPosition(kingPosition.getRow(),
-                kingPosition.getColumn() + (incrementer * colIncrement));
-        while (keepChecking) {
-            if (board.getPiece(checkingPosition) == null) {
-                System.out.println("            no piece in this column at "
-                        + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")");
-                incrementer++;
-                checkingPosition.setColValue(kingPosition.getColumn() + (incrementer * colIncrement));
-                keepChecking = isInBounds(checkingPosition.getRow(), checkingPosition.getColumn());
-            }
-            else {
-                System.out.println("            piece at (" + checkingPosition.getColumn() + ", " + checkingPosition.getRow() + ")");
-                keepChecking = false;
-                return rookThreaten(checkingPosition, gameBoard, teamColor);
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Checks to see if an enemy rook (or a queen) can reach the given position
-     * @param checkingPosition
-     * @param gameBoard
-     * @param teamColor
-     * @return true if reachable by enemy rook or queen, otherwise false
-     */
-    private boolean rookThreaten(ChessPosition checkingPosition, ChessBoard gameBoard, TeamColor teamColor) {
-        if (board.getPiece(checkingPosition).getTeamColor() == teamColor) {
-            System.out.println("                friend at " + checkingPosition.getColumn() + " " + checkingPosition.getRow() + ")");
-            return false;
-        }
-        else {
-            System.out.println("                Enemy piece at (" + checkingPosition.getColumn() + ", " + checkingPosition.getRow() + ")");
-            if (board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.ROOK
-                    || board.getPiece(checkingPosition).getPieceType() == ChessPiece.PieceType.QUEEN) {
-                System.out.println("                Piece is rook or queen'");
-                return true;
-            }
-            else {
-                System.out.println("                Piece is not threatening'");
-                return false;
-            }
-
-        }
-
     }
 
 
@@ -559,7 +245,7 @@ public class ChessGame {
         if(row <= 0 || row >= 9 || col <= 0 || col >= 9 ){
             return false;
         }
-        else{
+        else {
             return true;
         }
     }

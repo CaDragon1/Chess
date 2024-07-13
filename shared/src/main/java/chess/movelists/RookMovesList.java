@@ -13,8 +13,6 @@ public class RookMovesList extends MovesList{
     public RookMovesList(ChessBoard board, ChessPosition currentPosition) {
         super(board, currentPosition);
         pieceMoves = new HashSet<ChessMove>();
-        //possibleMove = new ChessMove();
-        //checkingPosition = new ChessPosition();
         calculateMove(currentPosition);
     }
 
