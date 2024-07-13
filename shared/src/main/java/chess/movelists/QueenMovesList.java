@@ -109,7 +109,6 @@ public class QueenMovesList extends MovesList {
     // Logic to add a move to the list
     void addDiagonalMove(int row, int column, ChessPosition myPosition){
         ChessPosition checkingPosition = new ChessPosition(row, column);
-        System.out.println("Adding move");
         pieceMoves.add(new ChessMove(myPosition, checkingPosition, null));
     }
 

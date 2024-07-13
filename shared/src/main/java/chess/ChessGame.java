@@ -53,27 +53,22 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
 
-
-
         Collection<ChessMove> allMoves
                 = new HashSet<ChessMove>(board.getPiece(startPosition).pieceMoves(board, startPosition));
         Set<ChessMove> validMoves = new HashSet<ChessMove>();
         validMoves.addAll(allMoves);
         board.printBoard();
 
-        for (ChessMove move : validMoves) {
-            System.out.println(move.toString());
-        }
-
-
         /// Step 0: Cycle through the set using an iterator
         for (ChessMove move : allMoves) {
+            ChessPiece takenPiece;
 
             // Step 1: Make the possible move on the checking board.
             System.out.println("\n ---- Checking move " + move + ": ----");
             System.out.println("    >> Starting position: (" + startPosition.getRow() + ", " + startPosition.getColumn() + ")");
             System.out.println("    >> Ending position: (" + move.getEndPosition().getRow() + ", " + move.getEndPosition().getColumn() + ")");
-            addMove(move);
+            System.out.println("    >> Promotion: " + move.getPromotionPiece());
+            takenPiece = addMove(move);
 
             // Step 2: Does the move put the king into check? If so, remove the move from the set.
             if (isInCheck(board.getPiece(move.getEndPosition()).getTeamColor())){
@@ -81,7 +76,7 @@ public class ChessGame {
                 System.out.println("Removed.\n");
             }
 
-            revertMove(move);
+            revertMove(move, takenPiece);
         }
 
         // Step 3: Return the final list of valid moves that DON'T put the king in check.
@@ -91,21 +86,41 @@ public class ChessGame {
     /**
      * Sets the board to a given movestate without changing the team color.
      * @param move is the move we want to make.
+     * @return returns the piece at the position we move to.
      */
-    public void addMove(ChessMove move) {
-        board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
-        board.addPiece(move.getStartPosition(), null);
+    public ChessPiece addMove(ChessMove move) {
+        ChessPiece piece = board.getPiece(move.getEndPosition());
+
+        if (move.getPromotionPiece() != null){
+            board.addPiece(move.getEndPosition(), new ChessPiece(teamTurn, move.getPromotionPiece()));
+            board.addPiece(move.getStartPosition(), null);
+            System.out.println("move has been made and " + board.getPiece(move.getEndPosition()).getPieceType() + " is now a "
+                    + move.getPromotionPiece());
+        }
+        else {
+            board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+            board.addPiece(move.getStartPosition(), null);
+        }
         System.out.println("move has been made");
+        return piece;
     }
 
     /**
      * Returns the board to its state before a move was made.
      * @param move is the move we want to undo.
      */
-    public void revertMove(ChessMove move) {
-        board.addPiece(move.getStartPosition(), board.getPiece(move.getEndPosition()));
-        board.addPiece(move.getEndPosition(), null);
-        System.out.println("move has been reverted");
+    public void revertMove(ChessMove move, ChessPiece takenPiece) {
+        if (move.getPromotionPiece() != null){
+            board.addPiece(move.getStartPosition(), new ChessPiece(teamTurn, ChessPiece.PieceType.PAWN));
+            board.addPiece(move.getEndPosition(), takenPiece);
+            System.out.println("move has been reverted and promotion piece " + move.getPromotionPiece() + " is now a "
+                + board.getPiece(move.getStartPosition()).getPieceType());
+        }
+        else {
+            board.addPiece(move.getStartPosition(), board.getPiece(move.getEndPosition()));
+            board.addPiece(move.getEndPosition(), takenPiece);
+            System.out.println("move has been reverted");
+        }
     }
 
     /**
@@ -116,7 +131,9 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         //checkingBoard = board;
-        if (validMoves(move.getStartPosition()).contains(move)){
+        board.printBoard();
+        if (board.getPiece(move.getStartPosition()) != null && validMoves(move.getStartPosition()).contains(move)
+                && board.getPiece(move.getStartPosition()).getTeamColor() == teamTurn){
             addMove(move);
             switch(teamTurn){
                 case WHITE:
@@ -133,17 +150,6 @@ public class ChessGame {
 
     }
 
-    /**
-     * Determines if the given team is in check
-     *
-     * @param teamColor which team to check for check
-     * @return True if the specified team is in check
-     */
-    /*public boolean isInCheck(TeamColor teamColor) {
-        System.out.println("CHECKING MAIN BOARD FOR " + teamColor + " isInCheck");
-        return putsInCheck(board, teamColor);
-    }*/
-
     public boolean isInCheck(TeamColor teamColor) {
 
         Set<ChessMove> allEnemyMoves = new HashSet<ChessMove>();
@@ -159,7 +165,7 @@ public class ChessGame {
             }
         }
         for (ChessMove move : allEnemyMoves) {
-            if (move.getEndPosition().equals(findKing(board, teamColor))){
+            if (move.getEndPosition().equals(findKing(teamColor))){
                 System.out.println(teamColor + " king under attack by " + board.getPiece(move.getStartPosition()).getPieceType()
                         + " at (" + move.getEndPosition().getRow() + ", " + move.getEndPosition().getColumn() + ")");
                 return true;
@@ -177,13 +183,14 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         HashSet<ChessMove> allMoves = getAllMoves(teamColor);
+        ChessPiece takenPiece;
 
         for (ChessMove move : allMoves) {
-            addMove(move);
+            takenPiece = addMove(move);
             if (!isInCheck(teamColor)){
                 return false;
             }
-            revertMove(move);
+            revertMove(move, takenPiece);
         }
         return true;
     }
@@ -252,20 +259,19 @@ public class ChessGame {
 
     /**
      * findKing locates what position the king of the given teamColor is in.
-     * @param gameBoard is the board we are looking at (typically the regular board).
      * @param teamColor is the team we are finding the king of.
      * @return the position of the king. If no king is found, returns null.
      */
-    public ChessPosition findKing(ChessBoard gameBoard, TeamColor teamColor) {
+    public ChessPosition findKing(TeamColor teamColor) {
         ChessPosition currentPosition = new ChessPosition();
 
         for (int row = 1; row <= 8; row++){
             currentPosition.setRowValue(row);
             for (int col = 1; col <= 8; col++){
                 currentPosition.setColValue(col);
-                if (gameBoard.getPiece(currentPosition) != null){
-                    if (gameBoard.getPiece(currentPosition).getTeamColor() == teamColor
-                    && gameBoard.getPiece(currentPosition).getPieceType() == ChessPiece.PieceType.KING){
+                if (board.getPiece(currentPosition) != null){
+                    if (board.getPiece(currentPosition).getTeamColor() == teamColor
+                    && board.getPiece(currentPosition).getPieceType() == ChessPiece.PieceType.KING){
                         return currentPosition;
                     }
                 }
