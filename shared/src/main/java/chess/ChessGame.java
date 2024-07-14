@@ -57,6 +57,7 @@ public class ChessGame {
                 = new HashSet<ChessMove>(board.getPiece(startPosition).pieceMoves(board, startPosition));
         Set<ChessMove> validMoves = new HashSet<ChessMove>();
         validMoves.addAll(allMoves);
+        TeamColor selectedTeam = board.getPiece(startPosition).getTeamColor();
         board.printBoard();
 
         /// Step 0: Cycle through the set using an iterator
@@ -71,7 +72,7 @@ public class ChessGame {
             takenPiece = addMove(move);
 
             // Step 2: Does the move put the king into check? If so, remove the move from the set.
-            if (isInCheck(board.getPiece(move.getEndPosition()).getTeamColor())){
+            if (isInCheck(selectedTeam)){
                 validMoves.remove(move);
                 System.out.println("Removed.\n");
             }
@@ -94,14 +95,13 @@ public class ChessGame {
         if (move.getPromotionPiece() != null){
             board.addPiece(move.getEndPosition(), new ChessPiece(teamTurn, move.getPromotionPiece()));
             board.addPiece(move.getStartPosition(), null);
-            System.out.println("move has been made and " + board.getPiece(move.getEndPosition()).getPieceType() + " is now a "
-                    + move.getPromotionPiece());
+            System.out.println("move has been made and PAWN is now a " + move.getPromotionPiece());
         }
         else {
             board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
             board.addPiece(move.getStartPosition(), null);
+            System.out.println("move has been made");
         }
-        System.out.println("move has been made");
         return piece;
     }
 
@@ -231,14 +231,34 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        Set<ChessMove> allMoves = getAllMoves(teamColor);
-        if(!isInCheck(teamColor)){
-            for (ChessMove move : allMoves) {}
 
-
+        if (isInCheck(teamColor)){
+            return false;
         }
 
-        return false;
+        Set<ChessMove> allMoves = getAllMoves(teamColor);
+
+        for (ChessMove move : allMoves) {
+
+            if (move == null){
+                System.out.println("Move is null");
+            }
+            else if (move.getStartPosition() == null){
+                System.out.println("Start position is null for move " + move.toString());
+            }
+            else if (move.getEndPosition() == null){
+                System.out.println("End position is null for move " + move.toString());
+            }
+
+            System.out.println("Checking move from (" + move.getStartPosition().getRow() + ", " + move.getStartPosition().getColumn()
+                    + ") to (" + move.getEndPosition().getRow() + ", " + move.getEndPosition().getColumn() + ")");
+
+            Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
+            if (!validMoves(move.getStartPosition()).isEmpty()){
+                return false;
+            }
+        }
+        return true;
     }
 
 
