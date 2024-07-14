@@ -52,35 +52,45 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-
-        Collection<ChessMove> allMoves
-                = new HashSet<ChessMove>(board.getPiece(startPosition).pieceMoves(board, startPosition));
         Set<ChessMove> validMoves = new HashSet<ChessMove>();
-        validMoves.addAll(allMoves);
-        TeamColor selectedTeam = board.getPiece(startPosition).getTeamColor();
-        board.printBoard();
 
-        /// Step 0: Cycle through the set using an iterator
-        for (ChessMove move : allMoves) {
-            ChessPiece takenPiece;
+        if(board.getPiece(startPosition) != null){
 
-            // Step 1: Make the possible move on the checking board.
-            System.out.println("\n ---- Checking move " + move + ": ----");
-            System.out.println("    >> Starting position: (" + startPosition.getRow() + ", " + startPosition.getColumn() + ")");
-            System.out.println("    >> Ending position: (" + move.getEndPosition().getRow() + ", " + move.getEndPosition().getColumn() + ")");
-            System.out.println("    >> Promotion: " + move.getPromotionPiece());
-            takenPiece = addMove(move);
+            // To get accurate returns, temporarily sets the turn to startPosition's team
+            //TeamColor currentTeamTurn = getTeamTurn();
+            //setTeamTurn(board.getPiece(startPosition).getTeamColor());
 
-            // Step 2: Does the move put the king into check? If so, remove the move from the set.
-            if (isInCheck(selectedTeam)){
-                validMoves.remove(move);
-                System.out.println("Removed.\n");
+            Collection<ChessMove> allMoves
+                    = new HashSet<ChessMove>(board.getPiece(startPosition).pieceMoves(board, startPosition));
+            validMoves.addAll(allMoves);
+            TeamColor selectedTeam = board.getPiece(startPosition).getTeamColor();
+            board.printBoard();
+
+            /// Step 0: Cycle through the set using an iterator
+            for (ChessMove move : allMoves) {
+                ChessPiece takenPiece;
+
+                // Step 1: Make the possible move on the checking board.
+                System.out.println("\n ---- Checking move " + move + ": ----");
+                System.out.println("    >> Starting position: (" + startPosition.getRow() + ", " + startPosition.getColumn() + ")");
+                System.out.println("    >> Ending position: (" + move.getEndPosition().getRow() + ", " + move.getEndPosition().getColumn() + ")");
+                System.out.println("    >> Promotion: " + move.getPromotionPiece());
+                takenPiece = addMove(move);
+
+                // Step 2: Does the move put the king into check? If so, remove the move from the set.
+                if (isInCheck(selectedTeam)){
+                    validMoves.remove(move);
+                    System.out.println("Removed.\n");
+                }
+
+                revertMove(move, takenPiece);
             }
+            // Return the team's turn to the correct team
+            //setTeamTurn(currentTeamTurn);
 
-            revertMove(move, takenPiece);
+            // Step 3: Return the final list of valid moves that DON'T put the king in check.
+            return validMoves;
         }
-
-        // Step 3: Return the final list of valid moves that DON'T put the king in check.
         return validMoves;
     }
 
@@ -152,6 +162,7 @@ public class ChessGame {
 
     public boolean isInCheck(TeamColor teamColor) {
 
+        // Create a set containing every enemy move possible.
         Set<ChessMove> allEnemyMoves = new HashSet<ChessMove>();
         ChessPosition checkingPosition;
         for (int i = 1; i <9; i++){
@@ -161,9 +172,14 @@ public class ChessGame {
                     System.out.println("____moves added for " + board.getPiece(checkingPosition).getPieceType() + " at ("
                             + i + ", " + j + ")____");
                     allEnemyMoves.addAll(board.getPiece(checkingPosition).pieceMoves(board, checkingPosition));
+
                 }
             }
         }
+        System.out.println("     isInCheck allEnemyMoves: " + allEnemyMoves.toString() + "\n     Seeing if "
+                + teamColor + " is in check");
+
+        // If the set of enemy moves has a move with an end position equaling the king's position, return true.
         for (ChessMove move : allEnemyMoves) {
             if (move.getEndPosition().equals(findKing(teamColor))){
                 System.out.println(teamColor + " king under attack by " + board.getPiece(move.getStartPosition()).getPieceType()
@@ -188,10 +204,22 @@ public class ChessGame {
         for (ChessMove move : allMoves) {
             takenPiece = addMove(move);
             if (!isInCheck(teamColor)){
+                if(board.getPiece(move.getStartPosition()) != null){
+                    System.out.println("KING NOT IN CHECKMATE from " + board.getPiece(move.getStartPosition()).getPieceType() + " at ("
+                            + move.getEndPosition().getRow() + ", " + move.getEndPosition().getColumn() + ")" );
+                    System.out.println("to (" + move.getStartPosition().getRow() + ", " + move.getStartPosition().getColumn() + ")");
+                }
+                else {
+                    System.out.println("KING NOT IN CHECKMATE [error] TESTED MOVE IS NULL: ");
+                    board.printBoard();
+                    System.out.println(move.getStartPosition().getRow() + ", " + move.getStartPosition().getColumn());
+                    //board.getPiece(move.getEndPosition());
+                }
                 return false;
             }
             revertMove(move, takenPiece);
         }
+        System.out.println("KING IN CHECKMATE");
         return true;
     }
 
@@ -204,18 +232,15 @@ public class ChessGame {
      */
     public HashSet<ChessMove> getAllMoves(TeamColor teamColor) {
         HashSet<ChessMove> allMoves = new HashSet<>();
-        ChessPosition checkingPosition = new ChessPosition();
 
         for (int column = 1; column <= 8; column++) {
             for (int row = 1; row <= 8; row++) {
 
-                checkingPosition.setColValue(column);
-                checkingPosition.setRowValue(row);
-                // The position has to have a piece of the team color in order to add the moves of.
-                if (board.getPiece(checkingPosition) != null) {
+                if (board.getPiece(new ChessPosition(row, column)) != null) {
 
-                    if (board.getPiece(checkingPosition).getTeamColor() == teamColor) {
-                        allMoves.addAll(board.getPiece(checkingPosition).pieceMoves(board, checkingPosition));
+                    if (board.getPiece(new ChessPosition(row, column)).getTeamColor() == teamColor) {
+                        System.out.println("Getting piece at position " + row + ", " + column);
+                        allMoves.addAll(board.getPiece(new ChessPosition(row, column)).pieceMoves(board, new ChessPosition(row, column)));
                     }
                 }
             }
@@ -237,6 +262,7 @@ public class ChessGame {
         }
 
         Set<ChessMove> allMoves = getAllMoves(teamColor);
+        board.printBoard();
 
         for (ChessMove move : allMoves) {
 
