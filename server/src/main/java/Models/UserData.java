@@ -1,5 +1,7 @@
 package Models;
 
+import java.util.Objects;
+
 /**
  * UserData object stores username, password, and email.
  * It contains getters and setters for each.
@@ -23,6 +25,9 @@ public class UserData {
 
     }
 
+    /**
+     * Getters and setters for each variable
+     */
     // Get username
     public String getUsername() {
         return username;
@@ -51,5 +56,20 @@ public class UserData {
     // Set email
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    /**
+     * Equals and HashCode methods
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserData userData)) return false;
+        return Objects.equals(username, userData.username) && Objects.equals(password, userData.password) && Objects.equals(email, userData.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, password, email);
     }
 }
